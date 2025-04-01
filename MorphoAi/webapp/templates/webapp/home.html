@@ -1,0 +1,53 @@
+{% extends 'webapp/base.html' %}
+{% block title %}Home - MorphoAI{% endblock %}
+{% block content %}
+<div class="home-container text-center">
+    <h1 class="display-3">MorphoAI</h1>
+    <p class="lead">
+        Een interactieve tool voor leerkrachten om hen te helpen bij het maken van opgaven 
+        op het gebied van morfologie aan de hand van een geïmporteerde tekst.
+    </p>
+    <a href="{% url 'generate' %}">
+        <button class="btn btn-info btn-lg text-white start-btn">Start</button>
+    </a>
+</div>
+
+<style>
+    .home-container {
+        max-width: 800px;
+        margin: auto;
+        padding: 50px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .display-3 {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .lead {
+        font-size: 1.3rem;
+        color: #555;
+        margin-bottom: 30px;
+    }
+
+    .start-btn {
+        font-size: 1.5rem;
+        padding: 15px 40px;
+        border: 2px solid black;
+        border-radius: 12px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .start-btn:hover {
+        background-color: #17a2b8;
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+</style>
+{% endblock %}

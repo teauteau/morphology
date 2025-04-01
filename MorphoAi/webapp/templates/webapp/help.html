@@ -1,0 +1,46 @@
+{% extends 'webapp/base.html' %}
+{% block title %}Help - MorphoAI{% endblock %}
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1 class="display-4">Veelgestelde vragen</h1>
+    <p class="lead text-muted">Hier vindt u antwoorden op de meest gestelde vragen over MorphoAI.</p>
+    <div class="accordion mt-4" id="faqAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#q1">
+                    Hoe werkt MorphoAI?
+                </button>
+            </h2>
+            <div id="q1" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    MorphoAI analyseert een ingevoerde tekst en genereert oefeningen op basis van morfologie.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#q2">
+                    Kan ik mijn eigen oefeningen aanpassen?
+                </button>
+            </h2>
+            <div id="q2" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    Ja, docenten kunnen oefeningen selecteren en aanpassen voordat ze worden geëxporteerd.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#q3">
+                    Worden mijn gegevens opgeslagen?
+                </button>
+            </h2>
+            <div id="q3" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    Nee, MorphoAI slaat geen ingevoerde teksten of oefeningen op. Alles gebeurt lokaal op uw apparaat.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

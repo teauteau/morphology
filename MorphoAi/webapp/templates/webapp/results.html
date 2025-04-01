@@ -1,0 +1,19 @@
+{% extends 'webapp/base.html' %}
+{% block title %}Resultaten - MorphoAI{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="display-4">Morfologische Analyse</h1>
+
+    <h2 class="mt-4">Ingevoerde Tekst:</h2>
+    <p class="lead border p-3 bg-light">{{ text }}</p>
+
+    <h2 class="mt-4">Gevonden Morfemen:</h2>
+    <p class="border p-3 bg-white">{{ morphemes }}</p>
+
+    <h2 class="mt-4">Geselecteerde Moeilijkheidsgraad:</h2>
+    <p class="border p-3">{{ difficulty }}</p>
+
+    <a href="{% url 'generate' %}" class="btn btn-primary mt-3">Nieuwe Oefening Genereren</a>
+</div>
+{% endblock %}

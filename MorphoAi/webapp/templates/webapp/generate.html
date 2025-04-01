@@ -1,0 +1,130 @@
+{% extends 'webapp/base.html' %}
+{% block title %}Genereer - MorphoAI{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="display-4">Laten we de magie uitvoeren</h1>
+
+    <h2 class="mt-4">1. Vul de tekst in waarmee u de opgaven wilt genereren.</h2>
+    <textarea id="text-input" class="form-control mt-3" placeholder="Plak hier uw tekst..." rows="5"></textarea>
+
+    <h2 class="mt-4">2. Selecteer de moeilijkheidsgraad.</h2>
+    <div class="btn-group mt-2" role="group">
+        <button id="easy" class="btn btn-success difficulty-btn">Makkelijk</button>
+        <button id="medium" class="btn btn-warning difficulty-btn">Gemiddeld</button>
+        <button id="hard" class="btn btn-danger difficulty-btn">Moeilijk</button>
+    </div>
+
+    <br />
+    <button id="generate-btn" class="btn btn-dark btn-lg mt-4" disabled>Genereer</button>
+</div>
+
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 15px;
+    }
+
+    .difficulty-btn {
+        padding: 10px 20px;
+        font-size: 1.2rem;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .difficulty-btn.active {
+        border: 3px solid black;
+        background-color: rgba(0, 0, 0, 0.1);
+        transform: scale(1.1);
+    }
+
+    #generate-btn {
+        transition: all 0.3s ease-in-out;
+    }
+
+    #generate-btn:hover {
+        background-color: #333;
+        color: white;
+        transform: scale(1.05);
+    }
+</style>
+
+<script>
+    const textInput = document.getElementById("text-input");
+    const generateBtn = document.getElementById("generate-btn");
+    const difficultyButtons = document.querySelectorAll(".difficulty-btn");
+
+    let selectedDifficulty = null;
+
+    textInput.addEventListener("input", updateButtonState);
+
+    difficultyButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            selectedDifficulty = button.innerText;
+            difficultyButtons.forEach((btn) => btn.classList.remove("active"));
+            button.classList.add("active");
+            updateButtonState();
+        });
+    });
+
+    function updateButtonState() {
+        generateBtn.disabled = !(textInput.value.trim() && selectedDifficulty);
+    }
+
+    generateBtn.addEventListener("click", async () => {
+        const text = textInput.value.trim();
+        if (!text) return;
+
+        generateBtn.innerText = "Even geduld...";
+        generateBtn.disabled = true;
+
+        try {
+            const response = await fetch("{% url 'generate' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify({ text: text, difficulty: selectedDifficulty }),
+            });
+
+            const data = await response.json();
+            if (data.result_url) {
+                window.location.href = data.result_url;  // Redirect to results page
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+
+        generateBtn.innerText = "Genereer";
+        generateBtn.disabled = false;
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+
+<div id="morpheme-output" class="mt-4"></div>
+
+{% endblock %}
