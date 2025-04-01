@@ -1,7 +1,7 @@
 import requests
 import json
 
-GOOGLE_GEMINI_API_KEY = "AIzaSyA3F__YWfcfjLiH8fB_LA1moMVAXUxXQok"
+GOOGLE_GEMINI_API_KEY = ...
 GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateText"
 
 def detect_morphemes(text):
