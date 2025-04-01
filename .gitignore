@@ -1,0 +1,31 @@
+# Ignore keys.py and other sensitive files
+keys.py
+*.key
+*.secret
+.env
+*.env
+secrets.json
+config.json
+
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+venv/
+env/
+.venv/
+
+# Jupyter Notebook checkpoints and temporary files
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
