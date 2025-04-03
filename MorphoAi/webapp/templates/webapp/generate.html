@@ -58,6 +58,7 @@
 </style>
 
 <script>
+    console.log("JavaScript loaded");
     const textInput = document.getElementById("text-input");
     const generateBtn = document.getElementById("generate-btn");
     const difficultyButtons = document.querySelectorAll(".difficulty-btn");
@@ -80,6 +81,7 @@
     }
 
     generateBtn.addEventListener("click", async () => {
+        event.preventDefault();
         const text = textInput.value.trim();
         if (!text) return;
 
@@ -99,6 +101,8 @@
             const data = await response.json();
             if (data.result_url) {
                 window.location.href = data.result_url;  // Redirect to results page
+            } else {
+                console.error("Fout:", data.error);
             }
         } catch (error) {
             console.error("Error:", error);
