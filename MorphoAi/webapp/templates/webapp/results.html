@@ -3,17 +3,51 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="display-4">Morfologische Analyse</h1>
+    <h1 class="display-4 text-center mb-4">Morfologische Oefeningen</h1>
 
-    <h2 class="mt-4">Ingevoerde Tekst:</h2>
-    <p class="lead border p-3 bg-light">{{ text }}</p>
+    <!-- Text Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Ingevoerde Tekst</h4>
+            <p class="card-text text-muted">{{ text }}</p>
+        </div>
+    </div>
 
-    <h2 class="mt-4">Gevonden Morfemen:</h2>
-    <p class="border p-3 bg-white">{{ morphemes }}</p>
+    <!-- Difficulty Level -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Geselecteerde Moeilijkheidsgraad</h4>
+            <span class="badge bg-primary fs-5">{{ difficulty }}</span>
+        </div>
+    </div>
 
-    <h2 class="mt-4">Geselecteerde Moeilijkheidsgraad:</h2>
-    <p class="border p-3">{{ difficulty }}</p>
+    <!-- Generated Exercises -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Gegenereerde Oefeningen</h4>
+            {% if exercises %}
+                <div class="list-group">
+                    {% for exercise, answer in exercises %}
+                        <div class="list-group-item">
+                            <p class="mb-2"><strong>Oefening {{ forloop.counter }}:</strong> {{ exercise }}</p>
+                            <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#answer{{ forloop.counter }}" aria-expanded="false" aria-controls="answer{{ forloop.counter }}">
+                                Toon Antwoord
+                            </button>
+                            <div class="collapse mt-2" id="answer{{ forloop.counter }}">
+                                <p class="text-success border rounded p-2 bg-light"><strong>Antwoord:</strong> {{ answer }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">Geen oefeningen gevonden.</p>
+            {% endif %}
+        </div>
+    </div>
 
-    <a href="{% url 'generate' %}" class="btn btn-primary mt-3">Nieuwe Oefening Genereren</a>
+    <!-- Button to Generate New Exercise -->
+    <div class="text-center">
+        <a href="{% url 'generate' %}" class="btn btn-lg btn-primary">Nieuwe Oefening Genereren</a>
+    </div>
 </div>
 {% endblock %}
