@@ -3,10 +3,13 @@ from django.http import JsonResponse
 from django.urls import reverse
 import json
 from .utils import generate_exercises
+from django.views.decorators.csrf import csrf_exempt #REMOVE FOR PRODUCTION
 
 def home(request):
     return render(request, 'webapp/home.html')
 
+
+@csrf_exempt # REMOVE FOR PRODUCTION
 def generate(request):
     if request.method == "POST":
         try:

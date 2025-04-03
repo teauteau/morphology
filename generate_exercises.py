@@ -1,5 +1,5 @@
 from google import genai
-from keys import gemini_API_key
+from morphology.MorphoAi.webapp.keys import gemini_API_key
 import json
 import re
 
