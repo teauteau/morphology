@@ -25,6 +25,7 @@ def generate(request):
             nr_of_fill_in_blanks = 2 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 6
             
             exercises = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks)
+            # exercises = [('q1', 'a1'), ('q2', 'a2')] #dummy
 
             # Store in session
             request.session["text"] = text
@@ -34,6 +35,7 @@ def generate(request):
             return JsonResponse({"result_url": reverse('results')})
 
         except Exception as e:
+            print(f"Error: {e}")
             return JsonResponse({"error": str(e)}, status=500)
 
     return render(request, 'webapp/generate.html')
