@@ -9,7 +9,7 @@ def home(request):
     return render(request, 'webapp/home.html')
 
 
-@csrf_exempt # REMOVE FOR PRODUCTION
+#@csrf_exempt # REMOVE FOR PRODUCTION
 def generate(request):
     if request.method == "POST":
         try:

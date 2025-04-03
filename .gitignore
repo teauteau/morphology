@@ -1,4 +1,5 @@
 # Ignore keys.py and other sensitive files
+**/keys.py
 keys.py
 *.key
 *.secret
