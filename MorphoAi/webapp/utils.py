@@ -97,6 +97,32 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks):
     for i in range(nr_of_fill_in_blanks):
         exercise = exercise_fill_in_the_blank(morphemes[i])
         exercises.append(exercise)
+    return exercises, morphemes
+
+def add_exercises(type, nr_of_exercises, morphemes, index=0):
+    """
+    Adds exercises to the list of exercises based on the type and number of exercises
+    """
+    index = int(index) + 1
+    exercises = []
+    if type == "identify":
+        # Add identify exercises
+        for i in range(nr_of_exercises):
+            # tries to use a not-used word, if not available, it starts at the beginning again 
+            j = (i + index - 1) % len(morphemes)
+            # exercise = (f"exercise {i} with morpheme {morphemes[j]['word']}", "answer {i}")
+            exercise = exercise_identify(morphemes[j])
+            exercises.append(exercise)
+    elif type == "fill_in_the_blank":
+        # Add fill in the blank exercises
+        for i in range(nr_of_exercises):
+ 
+            j = (i + index - 1) % len(morphemes)
+            # exercise = (f"exercise {i} with morpheme {morphemes[j]['word']}", "answer {i}")
+            exercise = exercise_fill_in_the_blank(morphemes[j])
+            exercises.append(exercise)
+    else:
+        raise ValueError("Invalid exercise type. Use 'identify' or 'fill_in_the_blank'.")
     return exercises
 
 

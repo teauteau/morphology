@@ -15,6 +15,8 @@ urlpatterns = [
     path('summary/', views.summary, name='summary'),
     path("results/", views.results_page, name="results"),
     path('download-exercises/', views.exercise_pdf, name='download_exercises'),
+    path('add-exercises/', views.add_exercises, name='add_exercises'),
+
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

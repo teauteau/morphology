@@ -2,16 +2,16 @@
 {% block title %}Genereer - MorphoAI{% endblock %}
 {% block content %}
 <div class="container mt-5">
-    <h1 class="display-4">Laten we de magie uitvoeren</h1>
+    <h1 class="display-4">Genereer nu uw opdrachten</h1>
 
-    <h2 class="mt-4">1. Vul de tekst in waarmee u de opgaven wilt genereren.</h2>
+    <h3 class="mt-4">1. Voer uw tekst in</h3>
     <textarea id="text-input" class="form-control mt-3" placeholder="Plak hier uw tekst..." rows="5"></textarea>
 
-    <h2 class="mt-4">2. Selecteer de moeilijkheidsgraad.</h2>
-    <div class="btn-group mt-2" role="group">
-        <button id="easy" class="btn btn-success difficulty-btn">Makkelijk</button>
+    <h3 class="mt-4">2. Selecteer de moeilijkheidsgraad.</h3>
+    <div class="btn-group mt-4" role="group">
+        <button id="easy" class="btn btn-success difficulty-btn"><span class="btn-text">Makkelijk</span></button>
         <button id="medium" class="btn btn-warning difficulty-btn">Gemiddeld</button>
-        <button id="hard" class="btn btn-danger difficulty-btn">Moeilijk</button>
+        <button id="hard" class="btn btn-danger difficulty-btn"><span class="btn-text">Moeilijk</span></button>
     </div>
 
     <br />
@@ -19,9 +19,9 @@
 </div>
 
 <style>
-    body {
+    /* body {
         font-family: 'Arial', sans-serif;
-    }
+    } */
 
     .container {
         max-width: 800px;
@@ -37,23 +37,29 @@
     .difficulty-btn {
         padding: 10px 20px;
         font-size: 1.2rem;
-        transition: all 0.2s ease-in-out;
+        transition: all 0.1s ease-in-out;
+        position: relative; /* Needed for proper text inversion */
     }
 
     .difficulty-btn.active {
         border: 3px solid black;
-        background-color: rgba(0, 0, 0, 0.1);
         transform: scale(1.1);
+        background-color: rgba(0, 0, 0, 0.1); /* Your existing effect */
     }
 
+    /* Invert ONLY the text color */
+    .difficulty-btn.active .btn-text {
+        filter: invert(1); /* Flips text color (black ↔ white) */
+        display: inline-block; /* Required for filter to work on text */
+    }
     #generate-btn {
-        transition: all 0.3s ease-in-out;
+        transition: all 0.1s ease-in-out;
     }
 
     #generate-btn:hover {
         background-color: #333;
         color: white;
-        transform: scale(1.05);
+        transform: scale(1.02);
     }
 </style>
 

@@ -3,12 +3,17 @@ from django.http import JsonResponse
 from django.urls import reverse
 import json
 from .utils import generate_exercises
+from .utils import add_exercises as utils_add_exercises
+
 from django.views.decorators.csrf import csrf_exempt #REMOVE FOR PRODUCTION
 
 #for pdf generation
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
+
+exercise_types = ["identify", "fill_in_the_blank"] 
+
 
 def home(request):
     return render(request, 'webapp/home.html')
@@ -26,16 +31,18 @@ def generate(request):
                 return JsonResponse({"error": "Geen tekst ontvangen"}, status=400)
 
             # Generate exercises (adjust the number based on difficulty)
-            nr_of_identify = 3 if difficulty == "Makkelijk" else 5 if difficulty == "Gemiddeld" else 7
-            nr_of_fill_in_blanks = 2 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 6
+            nr_of_identify = 2 if difficulty == "Makkelijk" else 3 if difficulty == "Gemiddeld" else 4
+            nr_of_fill_in_blanks = 2 if difficulty == "Makkelijk" else 3 if difficulty == "Gemiddeld" else 4
             
-            exercises = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks)
-            # exercises = [('q1', 'a1'), ('q2', 'a2'), ('q3', 'a3'), ('q4', 'a4')] #dummy
-
+            exercises, morphemes = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks)
+            # exercises, morphemes = [[('This is question one', 'This is answer one'), ('This is question two', 'This is answer two'), ('This is question three', 'This is answer three'), ('This is question 4', 'This is answer 4')], [{'word': 'bijen', 'free': ['bij'], 'bound': {'prefixes': [], 'suffixes': ['en'], 'other': []}}, {'word': 'bestuiven', 'free': ['stuif'], 'bound': {'prefixes': ['be'], 'suffixes': ['en'], 'other': []}}, {'word': 'bloem', 'free': ['bloem'], 'bound': {'prefixes': [], 'suffixes': [], 'other': []}}, {'word': 'honing', 'free': ['honing'], 'bound': {'prefixes': [], 'suffixes': [], 'other': []}}]] #dummy
             # Store in session
             request.session["text"] = text
             request.session["difficulty"] = difficulty
             request.session["exercises"] = exercises  # Store exercises in session
+            request.session["exercise_types"] = exercise_types
+            request.session["morphemes"] = morphemes
+            print(f"exercise_types: {exercise_types}")
 
             return JsonResponse({"result_url": reverse('results')})
 
@@ -68,11 +75,13 @@ def results_page(request):
     text = request.session.get("text", "Geen tekst ingevoerd")
     difficulty = request.session.get("difficulty", "Niet gespecificeerd")
     exercises = request.session.get("exercises", [])
+    exercise_types = request.session.get("exercise_types", [])
 
     return render(request, "webapp/results.html", {
         "text": text,
         "difficulty": difficulty,
         "exercises": exercises,
+        "exercise_types": exercise_types,
     })
 
 def exercise_pdf(request):
@@ -101,3 +110,25 @@ def exercise_pdf(request):
     if pisa_status.err:
         return HttpResponse('PDF generation failed', status=500)
     return response
+
+def add_exercises(request):
+    if request.method == 'POST':
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # AJAX request
+            data = json.loads(request.body)
+            exercises_types = data.get('exercises', [])
+            old_exercises = request.session.get('exercises', [])
+            new_exercises = []
+            for i, exercise in enumerate(exercises_types):
+                exercise_count = int(exercise.get('count', 0)) if exercise.get('count', '').strip() else 0
+                exercise_type = exercise.get('type', 'identify')
+                index = len(old_exercises) / len(exercise_types)
+                generated_exercises = utils_add_exercises(exercise_type, exercise_count, request.session.get("morphemes", [{'word': 'foutje', 'free': ['fout'], 'bound': {'prefixes': [], 'suffixes': ['je'], 'other': []}}]), index)
+                print(generated_exercises)
+                new_exercises.extend(generated_exercises)
+            combined_exercises = old_exercises + new_exercises
+            request.session['exercises'] = combined_exercises
+            # # Process exercises here
+            return render(request, 'webapp/partials/added_exercises.html', {
+            'exercises': combined_exercises
+        })

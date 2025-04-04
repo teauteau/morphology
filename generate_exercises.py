@@ -1,5 +1,5 @@
 from google import genai
-from morphology.MorphoAi.webapp.keys import gemini_API_key
+from keys import gemini_API_key
 import json
 import re
 
@@ -91,6 +91,7 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks):
     """
     important_words = extract_important_words(text, nr_of_identify + nr_of_fill_in_blanks)
     morphemes = extract_morphemes(important_words)
+    print(morphemes)
     exercises = []
     for i in range(nr_of_identify):
         exercise = exercise_identify(morphemes[i])
