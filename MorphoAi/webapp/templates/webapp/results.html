@@ -45,9 +45,44 @@
         </div>
     </div>
 
-    <!-- Button to Generate New Exercise -->
-    <div class="text-center">
-        <a href="{% url 'generate' %}" class="btn btn-lg btn-primary">Nieuwe Oefening Genereren</a>
+
+<!-- Download options popup -->
+<div class="modal fade" id="downloadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Download Options</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p>Select the version you want to download:</p>
+          <div class="d-grid gap-2">
+            <a href="{% url 'download_exercises' %}?version=student" class="btn btn-primary btn-lg">
+              <i class="fas fa-user-graduate"></i> Student Version (Questions Only)
+            </a>
+            <a href="{% url 'download_exercises' %}?version=teacher" class="btn btn-success btn-lg">
+              <i class="fas fa-chalkboard-teacher"></i> Teacher Version (With Answers)
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+    <!-- Button to print and Generate New Exercise -->
+    <div class="text-center mb-4">
+        <!-- button for direct download -->
+        <!-- <a href="{% url 'download_exercises' %}" class="btn btn-primary btn-lg me-3">
+            <i class="fas fa-file-pdf"></i> Download PDF
+        </a> -->
+        <!-- button to open popup -->
+        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#downloadModal">
+            <i class="fas fa-file-pdf"></i> Download PDF
+          </button>
+        
+        
+        <a href="{% url 'generate' %}" class="btn btn-lg btn-secondary">Nieuwe Oefening Genereren</a>
     </div>
 </div>
 {% endblock %}

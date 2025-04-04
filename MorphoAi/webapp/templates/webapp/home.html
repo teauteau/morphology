@@ -1,6 +1,8 @@
 {% extends 'webapp/base.html' %}
 {% block title %}Home - MorphoAI{% endblock %}
 {% block content %}
+{% load static %}
+
 <div class="home-container text-center">
     <h1 class="display-3">MorphoAI</h1>
     <p class="lead">
@@ -13,6 +15,12 @@
 </div>
 
 <style>
+    body {
+        margin: 0;
+        background: url("{% static 'bg3.jpg' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+
     .home-container {
         max-width: 800px;
         margin: auto;

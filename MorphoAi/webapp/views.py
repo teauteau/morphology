@@ -5,6 +5,11 @@ import json
 from .utils import generate_exercises
 from django.views.decorators.csrf import csrf_exempt #REMOVE FOR PRODUCTION
 
+#for pdf generation
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+
 def home(request):
     return render(request, 'webapp/home.html')
 
@@ -25,7 +30,7 @@ def generate(request):
             nr_of_fill_in_blanks = 2 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 6
             
             exercises = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks)
-            # exercises = [('q1', 'a1'), ('q2', 'a2')] #dummy
+            # exercises = [('q1', 'a1'), ('q2', 'a2'), ('q3', 'a3'), ('q4', 'a4')] #dummy
 
             # Store in session
             request.session["text"] = text
@@ -69,3 +74,30 @@ def results_page(request):
         "difficulty": difficulty,
         "exercises": exercises,
     })
+
+def exercise_pdf(request):
+    exercises = request.session.get('exercises', [])
+    version = request.GET.get('version', 'student')  # Default to student version
+
+    template = 'webapp/answers_pdf.html' if version == 'teacher' else 'webapp/exercise_pdf.html'
+    filename = f"exercises_{version}.pdf"
+
+    # Render template to HTML string
+    html = render_to_string(template, {
+        'exercises': exercises
+    })
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    # Generate PDF
+    pisa_status = pisa.CreatePDF(
+        html,
+        dest=response,
+        encoding='UTF-8',
+        link_callback=lambda uri, _: uri  # Handle external resources if needed
+    )
+    
+    if pisa_status.err:
+        return HttpResponse('PDF generation failed', status=500)
+    return response
