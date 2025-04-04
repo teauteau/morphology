@@ -16,6 +16,10 @@ urlpatterns = [
     path("results/", views.results_page, name="results"),
     path('download-exercises/', views.exercise_pdf, name='download_exercises'),
     path('add-exercises/', views.add_exercises, name='add_exercises'),
+    path('update_exercise/', views.update_exercise, name='update_exercise'),
+    path('delete_exercise/', views.delete_exercise, name='delete_exercise'),
+
+
 
 ]
 if settings.DEBUG:

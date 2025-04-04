@@ -132,3 +132,34 @@ def add_exercises(request):
             return render(request, 'webapp/partials/added_exercises.html', {
             'exercises': combined_exercises
         })
+
+def update_exercise(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        index = data.get('index')
+        new_exercise = data.get('exercise')
+        new_answer = data.get('answer')
+
+        exercises = request.session.get('exercises', [])
+        if 0 <= index < len(exercises):
+            exercises[index][0] = new_exercise
+            exercises[index][1] = new_answer
+            request.session['exercises'] = exercises
+            return JsonResponse({'status': 'ok'})
+        else:
+            return JsonResponse({'status': 'invalid index'}, status=400)
+
+    return JsonResponse({'error': 'invalid request'}, status=405)
+
+
+def delete_exercise(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        index = data.get('index')
+        exercises = request.session.get('exercises', [])
+        if 0 <= index < len(exercises):
+            del exercises[index]
+            request.session['exercises'] = exercises
+            return JsonResponse({'status': 'ok'})
+        return JsonResponse({'error': 'invalid index'}, status=400)
+    return JsonResponse({'error': 'invalid method'}, status=405)
