@@ -82,20 +82,73 @@ def exercise_fill_in_the_blank(dict_word):
     exercise_text = f"Fill in the blank in the following sentence: \n ({word}) {sentence_blanked}"
     answer_text = modified_word
     return exercise_text, answer_text
+
+def exercise_alternative_form(dict_word):
+    """
+    Generates an exercise asking students to provide an alternative form of a free morpheme.
+    Uses LLM to provide 3 examples if possible.
+    """
+    word = dict_word['word']
+    free_morphemes = dict_word['free']
     
-def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks):
+    if not free_morphemes:
+        return None  # Skip if no free morphemes found
+
+    selected_morpheme = free_morphemes[0]
+
+    # Prompt the LLM to suggest alternatives (if they exist)
+    prompt = (
+        f"Provide 3 alternative forms or words that contain the Dutch free morpheme '{selected_morpheme}', "
+        f"taken from the word '{word}'. These can include plural forms, diminutives, compounds, or verb forms. "
+        f"Return the result as a JSON array. If no alternatives exist, return an empty array []."
+    )
+
+    try:
+        output_raw = generate_text(prompt)
+        output_clean = remove_markdown(output_raw)
+        alternatives = json.loads(output_clean)
+        if not isinstance(alternatives, list):
+            alternatives = []
+    except Exception:
+        alternatives = []
+
+    # Build the exercise and answer
+    exercise_text = (
+        f"Using the free morpheme '{selected_morpheme}' from the word '{word}', "
+        f"write another form or word that contains this morpheme."
+    )
+
+    if alternatives:
+        answer_text = f"Example answers: {', '.join(alternatives)}. Other answers could include plural forms, compound words, or verb forms."
+    else:
+        answer_text = "Other answers could include plural forms, compound words, or verb forms."
+
+    return exercise_text, answer_text
+
+
+    
+def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative_forms=0):
     """
     Generates exercises for the given text 
     returns in format exercises = [(exercise_text, answer_text), ...]
     """
-    important_words = extract_important_words(text, nr_of_identify + nr_of_fill_in_blanks)
+    total_words_needed = nr_of_identify + nr_of_fill_in_blanks + nr_of_alternative_forms
+    important_words = extract_important_words(text, total_words_needed)
     morphemes = extract_morphemes(important_words)
     exercises = []
+    
+    # Add identify exercises
     for i in range(nr_of_identify):
         exercise = exercise_identify(morphemes[i])
         exercises.append(exercise)
+    
+    # Add fill in the blank exercises
     for i in range(nr_of_fill_in_blanks):
         exercise = exercise_fill_in_the_blank(morphemes[i])
+        exercises.append(exercise)
+
+    for i in range(nr_of_alternative_forms):
+        exercise = exercise_alternative_form(morphemes[i])
         exercises.append(exercise)
     return exercises, morphemes
 
@@ -123,11 +176,10 @@ def add_exercises(type, nr_of_exercises, morphemes, index=0):
             exercises.append(exercise)
     else:
         raise ValueError("Invalid exercise type. Use 'identify' or 'fill_in_the_blank'.")
-    return exercises
 
 
 # example text 
 
 #text = "Hallo kinderen! Vandaag gaan we een spannende reis maken naar de wonderlijke wereld van bijen. Bijen zijn hele kleine, maar superbelangrijke beestjes voor onze natuur en zelfs voor ons eten!Wat zijn bijen?Bijen zijn insecten die heel goed zijn in bestuiven. Dat betekent dat ze stuifmeel van de ene bloem naar de andere brengen. Zo helpen ze planten om vruchten te maken, zoals appels en kersen. Er zijn heel veel verschillende soorten bijen, maar de meeste wonen samen in een bijenkorf.Hoe leven bijen?In een bijenkorf woont een grote bijenfamilie. Er is een koninginbij, werkbijen, en mannetjesbijen. De koningin is de enige die eitjes legt. De werkbijen doen bijna al het werk: ze verzamelen nectar, maken honing, poetsen de bijenkorf, en zorgen voor de babybijtjes. De mannetjesbijen helpen de koningin met het krijgen van nieuwe bijtjes."
-#generated = generate_exercises(text, 2, 2)
+#generated = generate_exercises(text, 2, 2, 2)
 #print(generated)

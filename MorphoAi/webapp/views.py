@@ -30,12 +30,14 @@ def generate(request):
             if not text:
                 return JsonResponse({"error": "Geen tekst ontvangen"}, status=400)
 
-            # Generate exercises (adjust the number based on difficulty)
-            nr_of_identify = 2 if difficulty == "Makkelijk" else 3 if difficulty == "Gemiddeld" else 4
-            nr_of_fill_in_blanks = 2 if difficulty == "Makkelijk" else 3 if difficulty == "Gemiddeld" else 4
+            # Define number of exercises based on difficulty
+            nr_of_identify = 3 if difficulty == "Makkelijk" else 5 if difficulty == "Gemiddeld" else 7
+            nr_of_fill_in_blanks = 2 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 6
+            nr_of_alternative = 2 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 6  # New exercise type
             
-            exercises, morphemes = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks)
-            # exercises, morphemes = [[('This is question one', 'This is answer one'), ('This is question two', 'This is answer two'), ('This is question three', 'This is answer three'), ('This is question 4', 'This is answer 4')], [{'word': 'bijen', 'free': ['bij'], 'bound': {'prefixes': [], 'suffixes': ['en'], 'other': []}}, {'word': 'bestuiven', 'free': ['stuif'], 'bound': {'prefixes': ['be'], 'suffixes': ['en'], 'other': []}}, {'word': 'bloem', 'free': ['bloem'], 'bound': {'prefixes': [], 'suffixes': [], 'other': []}}, {'word': 'honing', 'free': ['honing'], 'bound': {'prefixes': [], 'suffixes': [], 'other': []}}]] #dummy
+            # Generate existing exercises
+            exercises,morphemes = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative)
+            
             # Store in session
             request.session["text"] = text
             request.session["difficulty"] = difficulty
