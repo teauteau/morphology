@@ -17,7 +17,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 
-exercise_types = ["identify", "fill_in_the_blank"] 
+exercise_types = ["identify", "fill_in_the_blank", "alternative"] 
 
 
 def home(request):
@@ -41,7 +41,7 @@ def generate(request):
             nr_of_alternative = 2 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 6  # New exercise type
             
             # Generate existing exercises
-            exercises, morphemes, important_words = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks)            
+            exercises, morphemes, important_words = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative)            
             # Store in session
             request.session["text"] = text
             request.session["difficulty"] = difficulty
@@ -114,6 +114,7 @@ def embolden(text, important_words):
                 f'    <li><h6 class="dropdown-header">Choose an exercise for <i>{token}</i></h6></li>'
                 f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 1)">Identify</a></li>'
                 f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 2)">Fill in the blank</a></li>'
+                f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 3)">Alternative form</a></li>'
                 f'  </ul>'
                 f'</div>'
             )

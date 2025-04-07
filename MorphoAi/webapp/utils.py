@@ -92,6 +92,7 @@ def exercise_alternative_form(dict_word):
     free_morphemes = dict_word['free']
     
     if not free_morphemes:
+        print("no free morphelemes found")
         return None  # Skip if no free morphemes found
 
     selected_morpheme = free_morphemes[0]
@@ -174,8 +175,15 @@ def add_exercises(type, nr_of_exercises, morphemes, index=0):
             # exercise = (f"exercise {i} with morpheme {morphemes[j]['word']}", "answer {i}")
             exercise = exercise_fill_in_the_blank(morphemes[j])
             exercises.append(exercise)
+    elif type == "alternative":
+        # Add alternative exercises
+        for i in range(nr_of_exercises):
+ 
+            j = (i + index - 1) % len(morphemes)
+            exercise = exercise_alternative_form(morphemes[j])
+            exercises.append(exercise)
     else:
-        raise ValueError("Invalid exercise type. Use 'identify' or 'fill_in_the_blank'.")
+        raise ValueError("Invalid exercise type.")
     return exercises
 
 def generate_exercise_given_word(word, exercise_type):
@@ -186,8 +194,10 @@ def generate_exercise_given_word(word, exercise_type):
         exercise = exercise_identify(morphemes[0])
     elif exercise_type == 2:
         exercise = exercise_fill_in_the_blank(morphemes[0])
+    elif exercise_type == 3:
+        exercise = exercise_alternative_form(morphemes[0])
     else:
-        raise ValueError("Invalid exercise type. Use 'identify' or 'fill_in_the_blank'.")
+        raise ValueError("Invalid exercise type.")
     return exercise
     
 # example text 
