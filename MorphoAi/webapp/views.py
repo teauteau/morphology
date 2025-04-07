@@ -189,7 +189,7 @@ def generate_exercise_given_word(request):
 
             return render(request, 'webapp/partials/added_exercises.html', {
             'exercises': exercises
-        })
+            })
 
 
 
@@ -222,6 +222,8 @@ def delete_exercise(request):
         if 0 <= index < len(exercises):
             del exercises[index]
             request.session['exercises'] = exercises
-            return JsonResponse({'status': 'ok'})
+            return render(request, 'webapp/partials/added_exercises.html', {
+            'exercises': exercises
+            })
         return JsonResponse({'error': 'invalid index'}, status=400)
     return JsonResponse({'error': 'invalid method'}, status=405)

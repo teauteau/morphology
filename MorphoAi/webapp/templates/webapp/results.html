@@ -48,8 +48,8 @@ body, .dropdown, .card-body {
 
 
 </style>
-<div class="container-fluid results-wrapper mt-5">
-    <h1 class="display-4 text-center mb-4">Morfologische Oefeningen</h1>
+<div class="container-fluid results-wrapper">
+    <h1 class="display-4 text-center m-5">Morfologische Oefeningen</h1>
 
     <div class="row">
         <!-- LEFT COLUMN -->
@@ -214,25 +214,33 @@ body, .dropdown, .card-body {
 
 
   function deleteExercise(index) {
-    if (!confirm("Weet je zeker dat je deze oefening wilt verwijderen?")) return;
+    if (!confirm("Weet je zeker dat je deze oefening wilt verwijderen?")) {
+        return;
+    }
 
     fetch("{% url 'delete_exercise' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": "{{ csrf_token }}"
-      },
-      body: JSON.stringify({ index: index - 1 }) // zero-based
-    }).then(res => {
-      if (res.ok) {
-        // Remove the element from the DOM
-        const item = document.querySelectorAll('.list-group-item')[index - 1];
-        if (item) item.remove();
-      } else {
-        alert("Kon de oefening niet verwijderen.");
-      }
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({ index: index - 1 }) // zero-based
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Kon de oefening niet verwijderen.");
+        }
+        return response.text();
+    })
+    .then(html => {
+        document.getElementById('exercises-results').innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message);
     });
-  }
+}
+
   function saveEditFromButton(button) {
     const index = parseInt(button.getAttribute("data-index"));
     saveEdit(index);
