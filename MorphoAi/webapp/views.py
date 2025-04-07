@@ -2,8 +2,13 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.urls import reverse
 import json
-from .utils import generate_exercises
+from .utils import generate_exercises, generate_exercise_given_word
 from .utils import add_exercises as utils_add_exercises
+from .utils import generate_exercise_given_word as  utils_generate_exercise_given_word
+from django.utils.html import escape, mark_safe
+import re
+
+
 
 from django.views.decorators.csrf import csrf_exempt #REMOVE FOR PRODUCTION
 
@@ -34,14 +39,16 @@ def generate(request):
             nr_of_identify = 2 if difficulty == "Makkelijk" else 3 if difficulty == "Gemiddeld" else 4
             nr_of_fill_in_blanks = 2 if difficulty == "Makkelijk" else 3 if difficulty == "Gemiddeld" else 4
             
-            exercises, morphemes = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks)
-            # exercises, morphemes = [[('This is question one', 'This is answer one'), ('This is question two', 'This is answer two'), ('This is question three', 'This is answer three'), ('This is question 4', 'This is answer 4')], [{'word': 'bijen', 'free': ['bij'], 'bound': {'prefixes': [], 'suffixes': ['en'], 'other': []}}, {'word': 'bestuiven', 'free': ['stuif'], 'bound': {'prefixes': ['be'], 'suffixes': ['en'], 'other': []}}, {'word': 'bloem', 'free': ['bloem'], 'bound': {'prefixes': [], 'suffixes': [], 'other': []}}, {'word': 'honing', 'free': ['honing'], 'bound': {'prefixes': [], 'suffixes': [], 'other': []}}]] #dummy
+            exercises, morphemes, important_words = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks)
+            # exercises, morphemes, important_words= [[('This is question one', 'This is answer one'), ('This is question two', 'This is answer two'), ('This is question three', 'This is answer three'), ('This is question 4', 'This is answer 4')], [{'word': 'bijen', 'free': ['bij'], 'bound': {'prefixes': [], 'suffixes': ['en'], 'other': []}}, {'word': 'bestuiven', 'free': ['stuif'], 'bound': {'prefixes': ['be'], 'suffixes': ['en'], 'other': []}}, {'word': 'bloem', 'free': ['bloem'], 'bound': {'prefixes': [], 'suffixes': [], 'other': []}}, {'word': 'honing', 'free': ['honing'], 'bound': {'prefixes': [], 'suffixes': [], 'other': []}}]] #dummy
             # Store in session
             request.session["text"] = text
             request.session["difficulty"] = difficulty
             request.session["exercises"] = exercises  # Store exercises in session
             request.session["exercise_types"] = exercise_types
             request.session["morphemes"] = morphemes
+            request.session["important_words"] = important_words
+
             print(f"exercise_types: {exercise_types}")
 
             return JsonResponse({"result_url": reverse('results')})
@@ -76,6 +83,9 @@ def results_page(request):
     difficulty = request.session.get("difficulty", "Niet gespecificeerd")
     exercises = request.session.get("exercises", [])
     exercise_types = request.session.get("exercise_types", [])
+    important_words = request.session.get("important_words", [])
+
+    text = embolden(text, important_words)
 
     return render(request, "webapp/results.html", {
         "text": text,
@@ -83,6 +93,34 @@ def results_page(request):
         "exercises": exercises,
         "exercise_types": exercise_types,
     })
+
+
+def embolden(text, important_words):
+    important_set = {w.lower() for w in important_words}
+    tokens = re.findall(r'\w+|\W+', text)
+
+    wrapped_tokens = []
+    for idx, token in enumerate(tokens):
+        if token.strip().isalnum():
+            word_class = "word bold" if token.lower() in important_set else "word"
+            wrapped = (
+                f'<div class="d-inline dropdown">'
+                f'  <span class="{word_class}" role="button" id="dropdownWord{idx}" '
+                f'        data-bs-toggle="dropdown" aria-expanded="false" data-word="{token}">'
+                f'    {token}'
+                f'  </span>'
+                f'  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownWord{idx}">'
+                f'    <li><h6 class="dropdown-header">Choose an exercise for <i>{token}</i></h6></li>'
+                f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 1)">Identify</a></li>'
+                f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 2)">Fill in the blank</a></li>'
+                f'  </ul>'
+                f'</div>'
+            )
+        else:
+            wrapped = token  # punctuation/space
+        wrapped_tokens.append(wrapped)
+
+    return mark_safe(''.join(wrapped_tokens))
 
 def exercise_pdf(request):
     exercises = request.session.get('exercises', [])
@@ -132,6 +170,28 @@ def add_exercises(request):
             return render(request, 'webapp/partials/added_exercises.html', {
             'exercises': combined_exercises
         })
+
+def generate_exercise_given_word(request):
+        if request.method == 'POST':
+            data = json.loads(request.body)
+            exercise_type = data.get('exercise_type')
+            word = data.get('word')
+            exercises = request.session.get('exercises', [])
+            exercise = utils_generate_exercise_given_word(word, exercise_type)
+            exercises.append(exercise)
+            request.session['exercises'] = exercises
+            # important_words = request.session.get("important_words", [])
+            # important_words = important_words.append(word)
+            # request.session["important_words"] = important_words
+            
+
+            return render(request, 'webapp/partials/added_exercises.html', {
+            'exercises': exercises
+        })
+
+
+
+
 
 def update_exercise(request):
     if request.method == 'POST':

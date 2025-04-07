@@ -88,7 +88,7 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks):
     Generates exercises for the given text 
     returns in format exercises = [(exercise_text, answer_text), ...]
     """
-    important_words = extract_important_words(text, nr_of_identify + nr_of_fill_in_blanks)
+    important_words = extract_important_words(text, nr_of_identify + nr_of_fill_in_blanks + 2)
     morphemes = extract_morphemes(important_words)
     exercises = []
     for i in range(nr_of_identify):
@@ -97,7 +97,7 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks):
     for i in range(nr_of_fill_in_blanks):
         exercise = exercise_fill_in_the_blank(morphemes[i])
         exercises.append(exercise)
-    return exercises, morphemes
+    return exercises, morphemes, important_words
 
 def add_exercises(type, nr_of_exercises, morphemes, index=0):
     """
@@ -125,7 +125,18 @@ def add_exercises(type, nr_of_exercises, morphemes, index=0):
         raise ValueError("Invalid exercise type. Use 'identify' or 'fill_in_the_blank'.")
     return exercises
 
-
+def generate_exercise_given_word(word, exercise_type):
+    morphemes = extract_morphemes([word])
+    exercise = []
+    print(exercise_type)
+    if exercise_type == 1:
+        exercise = exercise_identify(morphemes[0])
+    elif exercise_type == 2:
+        exercise = exercise_fill_in_the_blank(morphemes[0])
+    else:
+        raise ValueError("Invalid exercise type. Use 'identify' or 'fill_in_the_blank'.")
+    return exercise
+    
 # example text 
 
 #text = "Hallo kinderen! Vandaag gaan we een spannende reis maken naar de wonderlijke wereld van bijen. Bijen zijn hele kleine, maar superbelangrijke beestjes voor onze natuur en zelfs voor ons eten!Wat zijn bijen?Bijen zijn insecten die heel goed zijn in bestuiven. Dat betekent dat ze stuifmeel van de ene bloem naar de andere brengen. Zo helpen ze planten om vruchten te maken, zoals appels en kersen. Er zijn heel veel verschillende soorten bijen, maar de meeste wonen samen in een bijenkorf.Hoe leven bijen?In een bijenkorf woont een grote bijenfamilie. Er is een koninginbij, werkbijen, en mannetjesbijen. De koningin is de enige die eitjes legt. De werkbijen doen bijna al het werk: ze verzamelen nectar, maken honing, poetsen de bijenkorf, en zorgen voor de babybijtjes. De mannetjesbijen helpen de koningin met het krijgen van nieuwe bijtjes."
