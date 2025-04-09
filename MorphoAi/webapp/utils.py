@@ -2,6 +2,7 @@ from google import genai
 from .keys import gemini_API_key
 import json
 import re
+import random
 
 
 client = genai.Client(api_key=gemini_API_key)
@@ -126,14 +127,93 @@ def exercise_alternative_form(dict_word):
 
     return exercise_text, answer_text
 
+def generate_affix_matching_exercises(morphemes, important_words, count):
+    exercises = []
+    candidates = []
 
-    
-def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative_forms=0):
+    for m in morphemes:
+        word = m.get('word', '')
+        if word not in important_words:
+            continue
+
+        free = m.get('free', [])
+        bound = m.get('bound', {})
+        prefixes = bound.get('prefixes', [])
+        suffixes = bound.get('suffixes', [])
+        other = bound.get('other', [])
+
+        all_morphemes = free + prefixes + suffixes + other
+
+        if len(all_morphemes) == 2:
+            candidates.append((all_morphemes[0], all_morphemes[1], word))
+
+    selected = random.sample(candidates, min(count, len(candidates)))
+    if not selected:
+        return exercises
+
+    left_parts = [item[0] for item in selected]
+    right_parts = [item[1] for item in selected]
+    words = [item[2] for item in selected]
+
+    shuffled_rights = right_parts.copy()
+    random.shuffle(shuffled_rights)
+
+    # Build the question
+    question = "Match the left morphemes on the left with the correct right morphemes on the right:"
+    left_side = "\n".join(f"{i+1}. {left}" for i, left in enumerate(left_parts))
+    right_side = "\n".join(f"{chr(65+i)}. {right}" for i, right in enumerate(shuffled_rights))
+    full_question = f"{question}\n\n{left_side}\n\n{right_side}"
+
+    # Build the answer key
+    answer_mapping = []
+    for i, right in enumerate(right_parts):
+        label = chr(65 + shuffled_rights.index(right))
+        answer_mapping.append(f"{i+1} - {label} ({words[i]})")
+
+    answer = "\n".join(answer_mapping)
+    exercises.append((full_question, answer))
+
+    return exercises
+
+
+def exercise_error_correction(dict_word):
+    """
+    Generates an error correction exercise for a given word dict like {'word': 'run'}
+    """
+    word = dict_word['word']
+    prompt = (
+        f"Generate a sentence in Dutch for the word '{word}' where the word is used in its wrong form. "
+        "For example, a similar english sentence could be if the word is 'run' then the sentence is 'He runned fast'.\n"
+        "Answer format: sentence: <sentence>\nanswer: wrong_word = correct_word"
+    )
+
+    response = generate_text(prompt)
+    try:
+        parts = response.strip().split("answer:")
+        sentence = parts[0].replace("sentence:", "").strip()
+        correction = parts[1].strip()
+
+        if '=' in correction:
+            wrong_word, correct_word = map(str.strip, correction.split('='))
+            sentence_blanked = re.sub(rf'\\b{re.escape(wrong_word)}\\b', '_', sentence)
+            exercise_text = f"Correct the error in the following sentence: \n {sentence_blanked}"
+            answer_text = f"{wrong_word} = {correct_word}"
+        else:
+            exercise_text = f"[Bad format for correction: '{correction}']"
+            answer_text = "Could not parse correction."
+
+    except Exception as e:
+        exercise_text = f"[Error parsing response for word '{word}']"
+        answer_text = "Could not generate."
+
+    return exercise_text, answer_text
+
+def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative_forms, nr_wrong, nr_affix):
     """
     Generates exercises for the given text 
     returns in format exercises = [(exercise_text, answer_text), ...]
     """
-    total_words_needed = nr_of_identify + nr_of_fill_in_blanks + nr_of_alternative_forms
+    total_words_needed = nr_of_identify + nr_of_fill_in_blanks + nr_of_alternative_forms + nr_wrong + nr_affix
     important_words = extract_important_words(text, total_words_needed)
     morphemes = extract_morphemes(important_words)
     exercises = []
@@ -151,7 +231,17 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alterna
     for i in range(nr_of_alternative_forms):
         exercise = exercise_alternative_form(morphemes[i])
         exercises.append(exercise)
+
+    for i in range(nr_wrong):
+        exercise = exercise_error_correction(morphemes[i])
+        exercises.append(exercise)
+    if nr_affix > 0:
+        exercise = generate_affix_matching_exercises(morphemes, important_words, nr_affix)
+        exercises.extend(exercise)
+
     return exercises, morphemes, important_words
+    
+
 
 def add_exercises(type, nr_of_exercises, morphemes, index=0):
     """
@@ -182,6 +272,22 @@ def add_exercises(type, nr_of_exercises, morphemes, index=0):
             j = (i + index - 1) % len(morphemes)
             exercise = exercise_alternative_form(morphemes[j])
             exercises.append(exercise)
+    
+    elif type == "wrong_word_sentence":
+        for i in range(nr_of_exercises):
+            j = (i + index - 1) % len(morphemes)
+            exercise = exercise_error_correction(morphemes[j])
+            if exercise:  # Check if exercise is not None
+                exercises.append(exercise)
+        
+    elif type == "affix_matching":
+        # For affix_matching, we generate a complete new exercise with nr_of_exercises items
+        important_words = [m.get('word', '') for m in morphemes if 'word' in m]
+        nr_of_words = 4 if len(morphemes) > 4 else len(morphemes)
+        matching_exercises = generate_affix_matching_exercises(morphemes, important_words, nr_of_words)
+        exercises.extend(matching_exercises)
+
+
     else:
         raise ValueError("Invalid exercise type.")
     return exercises
@@ -196,6 +302,10 @@ def generate_exercise_given_word(word, exercise_type):
         exercise = exercise_fill_in_the_blank(morphemes[0])
     elif exercise_type == 3:
         exercise = exercise_alternative_form(morphemes[0])
+    elif exercise_type == 4:
+        exercise = exercise_error_correction(morphemes[0])
+    # elif exercise_type == 5:
+    #     exercise = generate_affix_matching_exercises(morphemes[0])
     else:
         raise ValueError("Invalid exercise type.")
     return exercise

@@ -17,7 +17,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 
-exercise_types = ["identify", "fill_in_the_blank", "alternative"] 
+exercise_types = ["identify", "fill_in_the_blank", "alternative", "wrong_word_sentence",  "affix_matching"] 
 
 
 def home(request):
@@ -36,12 +36,16 @@ def generate(request):
                 return JsonResponse({"error": "Geen tekst ontvangen"}, status=400)
 
             # Define number of exercises based on difficulty
-            nr_of_identify = 3 if difficulty == "Makkelijk" else 5 if difficulty == "Gemiddeld" else 7
-            nr_of_fill_in_blanks = 2 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 6
-            nr_of_alternative = 2 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 6  # New exercise type
+            
+            nr_of_identify = 1 if difficulty == "Makkelijk" else 5 if difficulty == "Gemiddeld" else 7
+            nr_of_fill_in_blanks = 1 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 6
+            nr_of_alternative = 1 if difficulty == "Makkelijk" else 1 if difficulty == "Gemiddeld" else 1  # New exercise type
+            nr_of_wrong_words = 1 if difficulty == "Makkelijk" else 1 if difficulty == "Gemiddeld" else 1  # New exercise type
+            nr_of_affix = 5 if difficulty == "Makkelijk" else 1 if difficulty == "Gemiddeld" else 1  # New exercise type
+
             
             # Generate existing exercises
-            exercises, morphemes, important_words = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative)            
+            exercises, morphemes, important_words = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative, nr_of_wrong_words, nr_of_affix)            
             # Store in session
             request.session["text"] = text
             request.session["difficulty"] = difficulty
@@ -115,6 +119,8 @@ def embolden(text, important_words):
                 f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 1)">Identify</a></li>'
                 f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 2)">Fill in the blank</a></li>'
                 f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 3)">Alternative form</a></li>'
+                f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 4)">Wrong word</a></li>'
+                # f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 5)">Affix matching</a></li>'
                 f'  </ul>'
                 f'</div>'
             )
