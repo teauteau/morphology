@@ -282,12 +282,11 @@ def add_exercises(type, nr_of_exercises, morphemes, index=0):
         
     elif type == "affix_matching":
         # For affix_matching, we generate a complete new exercise with nr_of_exercises items
-        important_words = [m.get('word', '') for m in morphemes if 'word' in m]
-        nr_of_words = 4 if len(morphemes) > 4 else len(morphemes)
-        matching_exercises = generate_affix_matching_exercises(morphemes, important_words, nr_of_words)
-        exercises.extend(matching_exercises)
-
-
+        if nr_of_exercises > 0:
+            important_words = [m.get('word', '') for m in morphemes if 'word' in m]
+            nr_of_words = 4 if len(morphemes) > 4 else len(morphemes)
+            matching_exercises = generate_affix_matching_exercises(morphemes, important_words, nr_of_words)
+            exercises.extend(matching_exercises)
     else:
         raise ValueError("Invalid exercise type.")
     return exercises

@@ -164,6 +164,7 @@ def add_exercises(request):
             data = json.loads(request.body)
             exercises_types = data.get('exercises', [])
             old_exercises = request.session.get('exercises', [])
+            print("exercise_types: ", exercises_types)
             new_exercises = []
             for i, exercise in enumerate(exercises_types):
                 exercise_count = int(exercise.get('count', 0)) if exercise.get('count', '').strip() else 0
