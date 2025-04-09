@@ -41,7 +41,7 @@ def generate(request):
             nr_of_fill_in_blanks = 1 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 6
             nr_of_alternative = 1 if difficulty == "Makkelijk" else 1 if difficulty == "Gemiddeld" else 1  # New exercise type
             nr_of_wrong_words = 1 if difficulty == "Makkelijk" else 1 if difficulty == "Gemiddeld" else 1  # New exercise type
-            nr_of_affix = 5 if difficulty == "Makkelijk" else 1 if difficulty == "Gemiddeld" else 1  # New exercise type
+            nr_of_affix = 4 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 4  # New exercise type
 
             
             # Generate existing exercises

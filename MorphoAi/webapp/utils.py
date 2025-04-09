@@ -159,10 +159,13 @@ def generate_affix_matching_exercises(morphemes, important_words, count):
     random.shuffle(shuffled_rights)
 
     # Build the question
-    question = "Match the left morphemes on the left with the correct right morphemes on the right:"
-    left_side = "\n".join(f"{i+1}. {left}" for i, left in enumerate(left_parts))
-    right_side = "\n".join(f"{chr(65+i)}. {right}" for i, right in enumerate(shuffled_rights))
-    full_question = f"{question}\n\n{left_side}\n\n{right_side}"
+    question = "Match morphemes on the left with the correct morphemes on the right:"
+    rows = "".join(
+        f"<tr><td>{i+1}. {left_parts[i]}</td><td>{chr(65+i)}. {shuffled_rights[i]}</td></tr>"
+        for i in range(len(left_parts))
+    )
+    table = f"<table style='margin-left:auto; margin-right:auto;'>{rows}</table>"
+    full_question = f"<div style='text-align:center;'>{question}<br><br>{table}</div>"
 
     # Build the answer key
     answer_mapping = []

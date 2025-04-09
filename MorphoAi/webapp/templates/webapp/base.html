@@ -31,7 +31,9 @@
 </head>
 <body>
     <nav class="navbar navbar-light px-4">
-        <span class="navbar-brand">[LOGO]</span>
+        <a href="{% url 'generate' %}">
+            <img src="/static/logo.png" style="width: 25%;" alt="MorKI Logo" class="navbar-brand">
+            <!-- <span class="navbar-brand">[LOGO]</span> </a> -->
         <div>
             <a href="{% url 'home' %}" class="btn {% if request.resolver_match.url_name == 'home' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">Home</a>
             <a href="{% url 'generate' %}" class="btn {% if request.resolver_match.url_name == 'generate' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">Genereer</a>
