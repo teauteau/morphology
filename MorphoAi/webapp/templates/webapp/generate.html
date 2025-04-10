@@ -2,7 +2,7 @@
 {% block title %}Genereer - MorphoAI{% endblock %}
 {% block content %}
 <div class="container mt-5">
-    <h1 class="display-4">Genereer nu uw opdrachten</h1>
+    <h1 class="display-4">Genereer uw opdrachten</h1>
 
     <h3 class="mt-4">1. Voer uw tekst in</h3>
     <textarea id="text-input" class="form-control mt-3" placeholder="Plak hier uw tekst..." rows="8"></textarea>
@@ -22,6 +22,21 @@
     /* body {
         font-family: 'Arial', sans-serif;
     } */
+
+    #easy.difficulty-btn {
+        background-color: #36b82a;
+        /* border: 0px solid #36b82a; */
+    }
+    #medium.difficulty-btn {
+        background-color: #fccd0e;
+        /* border: 0px solid #36b82a; */
+
+    }
+    #hard.difficulty-btn {
+        background-color: #eb5347;
+        /* border: 0px solid #36b82a; */
+
+    }
 
     .container {
         max-width: 800px;
@@ -44,14 +59,9 @@
     .difficulty-btn.active {
         border: 3px solid black;
         transform: scale(1.1);
-        background-color: rgba(0, 0, 0, 0.1); /* Your existing effect */
+        /* background-color: rgba(0, 0, 0, 0.1); Your existing effect */
     }
 
-    /* Invert ONLY the text color */
-    .difficulty-btn.active .btn-text {
-        filter: invert(1); /* Flips text color (black ↔ white) */
-        display: inline-block; /* Required for filter to work on text */
-    }
     #generate-btn {
         transition: all 0.1s ease-in-out;
     }

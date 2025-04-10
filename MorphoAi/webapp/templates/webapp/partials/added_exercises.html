@@ -48,7 +48,7 @@
   <div class="collapse mt-2" id="answer{{ forloop.counter }}">
     <p class="text-success border rounded p-2 bg-light">
       <strong>Antwoord:</strong>
-      <span class="answer-content" id="answer-content-{{ forloop.counter }}">{{ answer }}</span>
+      <span class="answer-content" id="answer-content-{{ forloop.counter }}">{{ answer|safe }}</span>
     </p>
   </div>
 </div>

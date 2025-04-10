@@ -24,7 +24,7 @@ def remove_markdown(text):
 
 def extract_important_words(text, nr_of_words):
     # returns most important words in text as a list of strings
-    prompt = f"Extract the {nr_of_words} most important Dutch words from the following Dutch text. Give it as an JSON array named 'words' Do not add the json markdown formatting, just plain text. Text:\n {text}"
+    prompt = f"Extract the {nr_of_words} most important Dutch words from the following Dutch text. Do not add any named entities. The words will be used to make exercises about morphology, so mainly choose words that consist of multiple morphemes. Give it as an JSON array named 'words' Do not add the json markdown formatting, just plain text. Text:  {text}"
     important_words_string = generate_text(prompt)
     important_words_string = remove_markdown(important_words_string)
     words = json.loads(important_words_string)['words']
@@ -144,8 +144,27 @@ def generate_affix_matching_exercises(morphemes, important_words, count):
 
         all_morphemes = free + prefixes + suffixes + other
 
+        if (len(all_morphemes) > 2):
+            for i in range(1, len(word)):
+                left = word[:i]
+                right = word[i:]
+                if left in all_morphemes:
+                    candidates.append((left, word[i:], word))
+                if right in all_morphemes:
+                    candidates.append((word[:i], right, word))
+        
+
         if len(all_morphemes) == 2:
             candidates.append((all_morphemes[0], all_morphemes[1], word))
+
+        if (len(all_morphemes) > 2):
+            for i in range(1, len(word)):
+                left = word[:i]
+                right = word[i:]
+                if left in all_morphemes:
+                    candidates.append((left, word[i:], word))
+                elif right in all_morphemes:
+                    candidates.append((word[:i], right, word))
 
     selected = random.sample(candidates, min(count, len(candidates)))
     if not selected:
@@ -165,13 +184,13 @@ def generate_affix_matching_exercises(morphemes, important_words, count):
         for i in range(len(left_parts))
     )
     table = f"<table style='margin-left:auto; margin-right:auto;'>{rows}</table>"
-    full_question = f"<div style='text-align:center;'>{question}<br><br>{table}</div>"
+    full_question = f"{question}<br><br>{table}"
 
     # Build the answer key
     answer_mapping = []
     for i, right in enumerate(right_parts):
         label = chr(65 + shuffled_rights.index(right))
-        answer_mapping.append(f"{i+1} - {label} ({words[i]})")
+        answer_mapping.append(f" {i+1} - {label} ({words[i]}) <br>")
 
     answer = "\n".join(answer_mapping)
     exercises.append((full_question, answer))
@@ -220,27 +239,35 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alterna
     important_words = extract_important_words(text, total_words_needed)
     morphemes = extract_morphemes(important_words)
     exercises = []
+    word_index = 0
     
     # Add identify exercises
-    for i in range(nr_of_identify):
+    for i in range(0, nr_of_identify):
         exercise = exercise_identify(morphemes[i])
         exercises.append(exercise)
-    
+    word_index = nr_of_identify
+
     # Add fill in the blank exercises
     for i in range(nr_of_fill_in_blanks):
-        exercise = exercise_fill_in_the_blank(morphemes[i])
+        exercise = exercise_fill_in_the_blank(morphemes[i + word_index])
         exercises.append(exercise)
+    word_index += nr_of_fill_in_blanks
 
     for i in range(nr_of_alternative_forms):
-        exercise = exercise_alternative_form(morphemes[i])
+        exercise = exercise_alternative_form(morphemes[i + word_index])
         exercises.append(exercise)
+    word_index += nr_of_alternative_forms
 
     for i in range(nr_wrong):
-        exercise = exercise_error_correction(morphemes[i])
+        exercise = exercise_error_correction(morphemes[i + word_index])
         exercises.append(exercise)
+    word_index += nr_wrong
+
     if nr_affix > 0:
+        print(nr_affix)
         exercise = generate_affix_matching_exercises(morphemes, important_words, nr_affix)
         exercises.extend(exercise)
+        print(exercise)
 
     return exercises, morphemes, important_words
     
