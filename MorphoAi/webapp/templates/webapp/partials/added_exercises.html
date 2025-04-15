@@ -4,7 +4,7 @@
   <!-- Exercise text -->
   <p class="mb-2">
     <strong>Oefening {{ forloop.counter }}:</strong>
-    <span class="exercise-content" id="exercise-content-{{ forloop.counter }}">{{ exercise|safe }}</span>
+    <div class="exercise-content" id="exercise-content-{{ forloop.counter }}">{{ exercise|safe|linebreaksbr }}</div>
   </p>
 
 

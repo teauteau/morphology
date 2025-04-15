@@ -184,7 +184,7 @@ def generate_affix_matching_exercises(morphemes, important_words, count):
         for i in range(len(left_parts))
     )
     table = f"<table style='margin-left:auto; margin-right:auto;'>{rows}</table>"
-    full_question = f"{question}<br><br>{table}"
+    full_question = f"{question} {table}"
 
     # Build the answer key
     answer_mapping = []

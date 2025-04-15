@@ -37,8 +37,8 @@
 
     {% for exercise, answer in exercises %}
     <div class="exercise">
-        <p><strong>Opdracht {{ forloop.counter }}:</strong> {{ exercise }}</p>
-        <p>Antwoord: {{ answer }}</p>
+        <p><strong>Opdracht {{ forloop.counter }}:</strong> {{ exercise|safe }}</p>
+        <p>Antwoord: {{ answer|safe }}</p>
     </div>
     
     {% if forloop.counter|divisibleby:7 %}

@@ -172,13 +172,17 @@ body, .dropdown, .card-body {
   function enableEdit(index) {
     // Replace exercise text with input
     const exerciseSpan = document.getElementById(`exercise-content-${index}`);
-    const exerciseText = exerciseSpan.textContent;
-    exerciseSpan.outerHTML = `<input type="text" class="form-control d-inline w-75" id="exercise-input-${index}" value="${exerciseText}">`;
+    var exerciseText = exerciseSpan.innerHTML;
+    // replace <br> with new line
+    exerciseText = exerciseText.replace(/<br>/g, "\n");
+    exerciseSpan.outerHTML = `<textarea type="text" class="form-control d-inline w-75" id="exercise-input-${index}" >${exerciseText} </textarea>`;
 
     // Replace answer text with input
     const answerSpan = document.getElementById(`answer-content-${index}`);
-    const answerText = answerSpan.textContent;
-    answerSpan.outerHTML = `<input type="text" class="form-control mt-2" id="answer-input-${index}" value="${answerText}">`;
+    var answerText = answerSpan.innerHTML;
+    // replace <br> with new line
+    answerText = answerText.replace(/<br>/g, "\n");
+    answerSpan.outerHTML = `<textarea type="text" class="form-control mt-2" id="answer-input-${index}" >${answerText}</textarea>`;
 
     // Toggle buttons
     document.getElementById(`edit-button-${index}`).style.display = "none";
@@ -188,8 +192,10 @@ body, .dropdown, .card-body {
   function saveEdit(index) {
     const exerciseInput = document.getElementById(`exercise-input-${index}`);
     const answerInput = document.getElementById(`answer-input-${index}`);
-    const newExercise = exerciseInput.value;
-    const newAnswer = answerInput.value;
+    var newExercise = exerciseInput.value;
+    var newAnswer = answerInput.value;
+    newExercise = newExercise.replace(/\n/g, "<br>"); 
+    newAnswer = newAnswer.replace(/\n/g, "<br>"); 
 
     // Update UI
     exerciseInput.outerHTML = `<span class="exercise-content" id="exercise-content-${index}">${newExercise}</span>`;
