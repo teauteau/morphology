@@ -80,10 +80,10 @@ body, .dropdown, .card-body {
                         {% include 'webapp/partials/added_exercises.html' %}
                     </div>
 
-                    <button class="btn btn-outline-primary btn-sm mt-4" type="button" data-bs-toggle="collapse" data-bs-target="#answer{{ forloop.counter }}" aria-expanded="false" aria-controls="answer{{ forloop.counter }}">
+                    <button class="btn btn-outline-primary btn-sm mt-4" type="button" data-bs-toggle="collapse" data-bs-target="#addExercisesCollapse" aria-expanded="false" aria-controls="addExercisesCollapse">
                         Add exercises
                     </button>
-                    <div class="collapse mt-2" id="answer{{ forloop.counter }}">
+                    <div class="collapse mt-2" id="addExercisesCollapse">
                         {% for exercise_type in exercise_types %}
                             <div class="form-group row justify-content-center mb-2">
                                 <label for="exercise{{forloop.counter}}" class="col-sm-4 col-form-label text-right">{{exercise_type}}</label>
@@ -93,6 +93,31 @@ body, .dropdown, .card-body {
                             </div>
                         {% endfor %}
                         <button id="generate-new-exercises-btn" class="btn btn-sm btn-outline-success mt-2">Generate exercises</button>
+                    </div>
+
+                    <!-- Add Your Own Exercise Form -->
+                    <div class="mt-4">
+                        <hr>
+                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#customExerciseCollapse" aria-expanded="false" aria-controls="customExerciseCollapse">
+                            Add your own exercise
+                        </button>
+                        <div class="collapse mt-2" id="customExerciseCollapse">
+                            <div class="card">
+                                <div class="card-body bg-light">
+                                    <form id="customExerciseForm">
+                                        <div class="mb-3">
+                                            <label for="exerciseText" class="form-label">Exercise Question</label>
+                                            <textarea class="form-control" id="exerciseText" rows="3" placeholder="Enter your exercise question here..." required></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="answerText" class="form-label">Answer</label>
+                                            <textarea class="form-control" id="answerText" rows="2" placeholder="Enter the answer here..."></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Add Custom Exercise</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -222,8 +247,6 @@ body, .dropdown, .card-body {
     });
   }
 
-
-
   function deleteExercise(index) {
     if (!confirm("Weet je zeker dat je deze oefening wilt verwijderen?")) {
         return;
@@ -288,6 +311,84 @@ body, .dropdown, .card-body {
         .then(html => {
             document.getElementById('exercises-results').innerHTML = html;
         })
+  });
+
+  // Custom Exercise Form handling
+  document.addEventListener('DOMContentLoaded', function() {
+      const customExerciseForm = document.getElementById('customExerciseForm');
+      
+      if (customExerciseForm) {
+          customExerciseForm.addEventListener('submit', function(e) {
+              e.preventDefault();
+              
+              const exerciseText = document.getElementById('exerciseText').value;
+              const answerText = document.getElementById('answerText').value;
+              
+              if (!exerciseText.trim()) {
+                  alert('Exercise text cannot be empty');
+                  return;
+              }
+              
+              // Send the custom exercise to the backend
+              fetch('{% url "add_custom_exercise" %}', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'X-Requested-With': 'XMLHttpRequest',
+                      'X-CSRFToken': '{{ csrf_token }}'
+                  },
+                  body: JSON.stringify({
+                      exercise_text: exerciseText,
+                      answer_text: answerText
+                  })
+              })
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  return response.text();
+              })
+              .then(html => {
+                  // Replace the exercises display with the updated content
+                  document.getElementById('exercises-results').innerHTML = html;
+                  
+                  // Reset the form
+                  document.getElementById('exerciseText').value = '';
+                  document.getElementById('answerText').value = '';
+                  
+                  // Show success message
+                  showAlert('Custom exercise added successfully!', 'success');
+                  
+                  // Close the collapse
+                  var bsCollapse = new bootstrap.Collapse(document.getElementById('customExerciseCollapse'));
+                  bsCollapse.hide();
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  showAlert('Failed to add custom exercise', 'danger');
+              });
+          });
+      }
+      
+      // Helper function to show alerts
+      function showAlert(message, type) {
+          const alertContainer = document.createElement('div');
+          alertContainer.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+          alertContainer.role = 'alert';
+          alertContainer.innerHTML = `
+              ${message}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          `;
+          
+          const container = document.querySelector('.card-body');
+          container.insertBefore(alertContainer, document.getElementById('exercises-results'));
+          
+          // Auto dismiss after 5 seconds
+          setTimeout(() => {
+              alertContainer.classList.remove('show');
+              setTimeout(() => alertContainer.remove(), 150);
+          }, 5000);
+      }
   });
 </script>
 {% endblock %}
