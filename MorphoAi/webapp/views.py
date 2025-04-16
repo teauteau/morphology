@@ -32,17 +32,35 @@ def generate(request):
             text = data.get("text", "").strip()
             difficulty = data.get("difficulty", "")
             
-            if not text:
+            if not text or not difficulty:
                 return JsonResponse({"error": "Geen tekst ontvangen"}, status=400)
 
             # Define number of exercises based on difficulty
-            
-            nr_of_identify = 1 if difficulty == "Makkelijk" else 5 if difficulty == "Gemiddeld" else 7
-            nr_of_fill_in_blanks = 1 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 6
-            nr_of_alternative = 1 if difficulty == "Makkelijk" else 1 if difficulty == "Gemiddeld" else 1  # New exercise type
-            nr_of_wrong_words = 1 if difficulty == "Makkelijk" else 1 if difficulty == "Gemiddeld" else 1  # New exercise type
-            nr_of_affix = 4 if difficulty == "Makkelijk" else 4 if difficulty == "Gemiddeld" else 4  # New exercise type
+            nr_of_identify = 0
+            nr_of_fill_in_blanks = 0
+            nr_of_alternative = 0
+            nr_of_wrong_words = 0
+            nr_of_affix = 0
 
+            if "easy" in difficulty:
+                nr_of_identify += 1
+                nr_of_fill_in_blanks += 1
+                nr_of_alternative += 1
+                nr_of_wrong_words += 0
+                nr_of_affix += 0
+            if "medium" in difficulty:
+                nr_of_identify += 0
+                nr_of_fill_in_blanks += 0
+                nr_of_alternative += 0
+                nr_of_wrong_words += 1
+                nr_of_affix += 1
+            if "hard" in difficulty:
+                nr_of_identify += 0
+                nr_of_fill_in_blanks += 0
+                nr_of_alternative += 0
+                nr_of_wrong_words += 0
+                nr_of_affix += 0
+            
             
             # Generate existing exercises
             exercises, morphemes, important_words = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative, nr_of_wrong_words, nr_of_affix)            
