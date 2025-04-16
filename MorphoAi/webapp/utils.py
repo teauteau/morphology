@@ -133,38 +133,32 @@ def generate_affix_matching_exercises(morphemes, important_words, count):
 
     for m in morphemes:
         word = m.get('word', '')
+        # check if word is in important words
         if word not in important_words:
             continue
 
+            
         free = m.get('free', [])
         bound = m.get('bound', {})
         prefixes = bound.get('prefixes', [])
         suffixes = bound.get('suffixes', [])
         other = bound.get('other', [])
 
+        # make list with the words morphemes
         all_morphemes = free + prefixes + suffixes + other
 
+        # if there are more than 2 morphemes, go over all letters from left to right till a morpheme is found on the left or right
         if (len(all_morphemes) > 2):
             for i in range(1, len(word)):
                 left = word[:i]
                 right = word[i:]
-                if left in all_morphemes:
-                    candidates.append((left, word[i:], word))
-                if right in all_morphemes:
-                    candidates.append((word[:i], right, word))
+                if left in all_morphemes or right in all_morphemes:
+                    candidates.append((left, right, word))
         
-
+        # if there are 2 morphemes, add them to the candidates list
         if len(all_morphemes) == 2:
             candidates.append((all_morphemes[0], all_morphemes[1], word))
 
-        if (len(all_morphemes) > 2):
-            for i in range(1, len(word)):
-                left = word[:i]
-                right = word[i:]
-                if left in all_morphemes:
-                    candidates.append((left, word[i:], word))
-                elif right in all_morphemes:
-                    candidates.append((word[:i], right, word))
 
     selected = random.sample(candidates, min(count, len(candidates)))
     if not selected:
@@ -235,7 +229,7 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alterna
     Generates exercises for the given text 
     returns in format exercises = [(exercise_text, answer_text), ...]
     """
-    total_words_needed = nr_of_identify + nr_of_fill_in_blanks + nr_of_alternative_forms + nr_wrong + nr_affix
+    total_words_needed = nr_of_identify + nr_of_fill_in_blanks + nr_of_alternative_forms + nr_wrong + 4
     important_words = extract_important_words(text, total_words_needed)
     morphemes = extract_morphemes(important_words)
     exercises = []
@@ -264,8 +258,7 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alterna
     word_index += nr_wrong
 
     if nr_affix > 0:
-        print(nr_affix)
-        exercise = generate_affix_matching_exercises(morphemes, important_words, nr_affix)
+        exercise = generate_affix_matching_exercises(morphemes, important_words, 4)
         exercises.extend(exercise)
         print(exercise)
 

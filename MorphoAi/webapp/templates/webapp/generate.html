@@ -2,6 +2,10 @@
 {% block title %}Genereer - MorphoAI{% endblock %}
 {% block content %}
 <div class="container mt-5">
+    <div id="error-alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+        <span id="error-message"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <h1 class="display-4">Genereer uw opdrachten</h1>
 
     <h3 class="mt-4">1. Voer uw tekst in</h3>
@@ -9,10 +13,11 @@
 
     <h3 class="mt-4">2. Selecteer de moeilijkheidsgraad</h3>
     <div class="btn-group mt-4" role="group">
-        <button id="easy" class="btn btn-success difficulty-btn"><span class="btn-text">Makkelijk</span></button>
-        <button id="medium" class="btn btn-warning difficulty-btn">Gemiddeld</button>
-        <button id="hard" class="btn btn-danger difficulty-btn"><span class="btn-text">Moeilijk</span></button>
+        <button id="easy" class="btn btn-success difficulty-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Gebaseerd op Bloom's taxonomie niveaus 1 en 2"><span class="btn-text">Makkelijk</span></button>
+        <button id="medium" class="btn btn-warning difficulty-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Gebaseerd op Bloom's taxonomie niveaus 3 en 4">Gemiddeld</button>
+        <button id="hard" class="btn btn-danger difficulty-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Gebaseerd op Bloom's taxonomie niveaus 5 en 6"><span class="btn-text">Moeilijk</span></button>
     </div>
+
 
     <br />
     <button id="generate-btn" class="btn btn-dark btn-lg mt-4" disabled>Genereer</button>
@@ -23,20 +28,7 @@
         font-family: 'Arial', sans-serif;
     } */
 
-    #easy.difficulty-btn {
-        background-color: #36b82a;
-        /* border: 0px solid #36b82a; */
-    }
-    #medium.difficulty-btn {
-        background-color: #fccd0e;
-        /* border: 0px solid #36b82a; */
 
-    }
-    #hard.difficulty-btn {
-        background-color: #eb5347;
-        /* border: 0px solid #36b82a; */
-
-    }
 
     .container {
         max-width: 800px;
@@ -48,19 +40,54 @@
         display: flex;
         gap: 15px;
     }
-
     .difficulty-btn {
-        padding: 10px 20px;
-        font-size: 1.2rem;
-        transition: all 0.1s ease-in-out;
-        position: relative; /* Needed for proper text inversion */
+    background-color: #ccc; /* grey for inactive state */
+    color: black;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    transition: all 0.1s ease-in-out;
+    position: relative;
+    border: none;
+}
+
+    #easy.difficulty-btn.active {
+    background-color: #36b82a;
+    color: white;
+    transform: scale(1.05);
     }
 
-    .difficulty-btn.active {
-        border: 3px solid black;
-        transform: scale(1.1);
-        /* background-color: rgba(0, 0, 0, 0.1); Your existing effect */
+    #medium.difficulty-btn.active {
+    background-color: #fccd0e;
+    color: black;
+    transform: scale(1.05);
     }
+
+    #hard.difficulty-btn.active {
+    background-color: #eb5347;
+    color: white;
+    transform: scale(1.05); 
+    }
+
+    
+    /* Tooltip styling */
+    .difficulty-btn::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 10;
+    }
+
 
     #generate-btn {
         transition: all 0.1s ease-in-out;
@@ -74,26 +101,54 @@
 </style>
 
 <script>
+function showError(message) {
+    const alertBox = document.getElementById("error-alert");
+    const errorMessage = document.getElementById("error-message");
+
+    // Check if the alertBox and errorMessage exist
+    if (!alertBox || !errorMessage) {
+        console.error("Error alert or message element not found");
+        return;
+    }
+
+    // Set the error message text
+    errorMessage.textContent = message;
+    alertBox.classList.remove("d-none");  // Make alert visible
+
+    // Auto-hide after 5 seconds (5000ms)
+    setTimeout(() => {
+        alertBox.classList.add("d-none");  // Hide the alert
+    }, 5000);
+}
+
     console.log("JavaScript loaded");
     const textInput = document.getElementById("text-input");
     const generateBtn = document.getElementById("generate-btn");
     const difficultyButtons = document.querySelectorAll(".difficulty-btn");
 
-    let selectedDifficulty = null;
+    let selectedDifficulties = new Set();
 
     textInput.addEventListener("input", updateButtonState);
 
     difficultyButtons.forEach((button) => {
         button.addEventListener("click", () => {
-            selectedDifficulty = button.innerText;
-            difficultyButtons.forEach((btn) => btn.classList.remove("active"));
-            button.classList.add("active");
+            const level = button.getAttribute("id");
+
+            if (selectedDifficulties.has(level)) {
+                selectedDifficulties.delete(level);
+                button.classList.remove("active");
+            } else {
+                selectedDifficulties.add(level);
+                button.classList.add("active");
+            }
+
             updateButtonState();
         });
     });
 
+
     function updateButtonState() {
-        generateBtn.disabled = !(textInput.value.trim() && selectedDifficulty);
+        generateBtn.disabled = !(textInput.value.trim() && selectedDifficulties.size > 0);
     }
 
     generateBtn.addEventListener("click", async () => {
@@ -105,13 +160,14 @@
         generateBtn.disabled = true;
 
         try {
+            const levels = Array.from(selectedDifficulties); // ["Makkelijk", "Gemiddeld"]
             const response = await fetch("{% url 'generate' %}", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": getCookie("csrftoken"),
                 },
-                body: JSON.stringify({ text: text, difficulty: selectedDifficulty }),
+                body: JSON.stringify({ text: text, difficulty: levels }),
             });
 
             const data = await response.json();
@@ -119,9 +175,12 @@
                 window.location.href = data.result_url;  // Redirect to results page
             } else {
                 console.error("Fout:", data.error);
+                showError("Er is iets misgegaan bij het genereren. Probeer het opnieuw.");
             }
         } catch (error) {
             console.error("Error:", error);
+            showError("Er is een fout opgetreden. Controleer je verbinding of probeer het later opnieuw.");
+
         }
 
         generateBtn.innerText = "Genereer";
@@ -136,5 +195,13 @@
 
 
 <div id="morpheme-output" class="mt-4"></div>
+<!-- Bootstrap JS bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Then your custom tooltip code -->
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+</script>
 
 {% endblock %}
