@@ -252,3 +252,22 @@ def delete_exercise(request):
             })
         return JsonResponse({'error': 'invalid index'}, status=400)
     return JsonResponse({'error': 'invalid method'}, status=405)
+
+def add_custom_exercise(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        exercise_text = data.get('exercise_text', '')
+        answer_text = data.get('answer_text', '')
+        
+        if not exercise_text.strip():
+            return JsonResponse({'error': 'Exercise text cannot be empty'}, status=400)
+            
+        exercises = request.session.get('exercises', [])
+        exercises.append((exercise_text, answer_text))
+        request.session['exercises'] = exercises
+        
+        return render(request, 'webapp/partials/added_exercises.html', {
+            'exercises': exercises
+        })
+        
+    return JsonResponse({'error': 'Invalid request'}, status=405)

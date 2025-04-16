@@ -18,6 +18,7 @@ urlpatterns = [
     path('add-exercises/', views.add_exercises, name='add_exercises'),
     path('update_exercise/', views.update_exercise, name='update_exercise'),
     path('delete_exercise/', views.delete_exercise, name='delete_exercise'),
+    path('add_custom_exercise/', views.add_custom_exercise, name='add_custom_exercise'),
     path('generate_exercise_given_word/', views.generate_exercise_given_word, name='generate_exercise_given_word'),
 
 
