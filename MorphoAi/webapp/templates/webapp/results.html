@@ -49,7 +49,20 @@ body, .dropdown, .card-body {
 
 </style>
 <div class="container-fluid results-wrapper">
-    <h1 class="display-4 text-center m-5">Morfologische Oefeningen</h1>
+    <div  class="d-flex align-items-center justify-content-center ">
+        <h1 class="display-4 text-center my-5 me-3" id="title"> {{title}}</h1>
+        <!-- Edit/Save buttons -->
+        <button class="btn btn-outline-primary btn-sm mt-3" title="Titel aanpassen" type="button" data-index=""
+            onclick="titleEdit()" id="edit-title-button">
+            <!-- edit pen icon-->   
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16"> <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" /></svg>
+        </button>
+        <button class="btn btn-primary btn-sm mb-2" type="button" data-index=""
+            onclick="saveTitle()" id="save-title-button" style="display: none;">
+            Opslaan
+        </button>
+    </div>
+    
 
     <div class="row">
         <!-- LEFT COLUMN -->
@@ -81,7 +94,7 @@ body, .dropdown, .card-body {
                     </div>
 
                     <button class="btn btn-outline-primary btn-sm mt-4" type="button" data-bs-toggle="collapse" data-bs-target="#addExercisesCollapse" aria-expanded="false" aria-controls="addExercisesCollapse">
-                        Add exercises
+                        Add  generated exercises
                     </button>
                     <div class="collapse mt-2" id="addExercisesCollapse">
                         {% for exercise_type in exercise_types %}
@@ -96,10 +109,10 @@ body, .dropdown, .card-body {
                     </div>
 
                     <!-- Add Your Own Exercise Form -->
-                    <div class="mt-4">
-                        <hr>
+                    <div class="mt-2">
+                        <!-- <hr> -->
                         <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#customExerciseCollapse" aria-expanded="false" aria-controls="customExerciseCollapse">
-                            Add your own exercise
+                            Add custom exercise
                         </button>
                         <div class="collapse mt-2" id="customExerciseCollapse">
                             <div class="card">
@@ -113,7 +126,7 @@ body, .dropdown, .card-body {
                                             <label for="answerText" class="form-label">Answer</label>
                                             <textarea class="form-control" id="answerText" rows="2" placeholder="Enter the answer here..."></textarea>
                                         </div>
-                                        <button type="submit" class="btn btn-primary">Add Custom Exercise</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Add exercise</button>
                                     </form>
                                 </div>
                             </div>
@@ -123,10 +136,10 @@ body, .dropdown, .card-body {
             </div>
           <!-- Button to print and Generate New Exercise -->
           <div class="text-center mb-4">
-            <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#downloadModal">
+            <button class="btn btn-primary " data-bs-toggle="modal" data-bs-target="#downloadModal">
               <i class="fas fa-file-pdf"></i> Download PDF
             </button>
-            <a href="{% url 'generate' %}" class="btn btn-lg btn-secondary">Nieuwe Oefening Genereren</a>
+            <a href="{% url 'generate' %}" class="btn btn-success">Nieuwe tekst</a>
           </div>
         </div>
     </div>
@@ -194,6 +207,42 @@ body, .dropdown, .card-body {
 
 
 <script>
+
+function titleEdit(){
+    // Get the current title text
+    var titleText = document.getElementById("title").innerHTML;
+    // Replace the title text with an input field
+    document.getElementById("title").outerHTML = `<input type="text" class="display-4 text-center m-5 form-control" style="font-size: 36px;" id="title-input" value="${titleText}">`;
+    // Change the button to save mode
+    document.getElementById("edit-title-button").style.display = "none";
+    document.getElementById("save-title-button").style.display = "inline-block";
+  }
+
+  function saveTitle() {
+    // Get the new title text from the input field
+    var newTitle = document.getElementById("title-input").value;
+    // Replace the input field with the new title text
+    document.getElementById("title-input").outerHTML = `<h1 class="display-4 text-center m-5" id="title">${newTitle}</h1>`;
+    // Change the button back to edit mode
+    document.getElementById("edit-title-button").style.display = "inline-block";
+    document.getElementById("save-title-button").style.display = "none";
+    // Send the new title to the backend
+    fetch("{% url 'update_title' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": '{{ csrf_token }}'
+      },
+      body: JSON.stringify({ title: newTitle })
+    }).then(res => {
+      if (!res.ok) {
+        alert("error when storing to session.");
+      }
+    });
+}
+
+
+
   function enableEdit(index) {
     // Replace exercise text with input
     const exerciseSpan = document.getElementById(`exercise-content-${index}`);

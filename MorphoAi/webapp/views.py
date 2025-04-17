@@ -71,6 +71,7 @@ def generate(request):
             request.session["exercise_types"] = exercise_types
             request.session["morphemes"] = morphemes
             request.session["important_words"] = important_words
+            request.session['title'] = "Opdrachten over Morfologie" # init title
 
             print(f"exercise_types: {exercise_types}")
 
@@ -102,6 +103,7 @@ def help_page(request):
     return render(request, 'webapp/help.html')
 
 def results_page(request):
+    title = request.session.get("title")
     text = request.session.get("text", "Geen tekst ingevoerd")
     difficulty = request.session.get("difficulty", "Niet gespecificeerd")
     exercises = request.session.get("exercises", [])
@@ -115,6 +117,7 @@ def results_page(request):
         "difficulty": difficulty,
         "exercises": exercises,
         "exercise_types": exercise_types,
+        "title" : title
     })
 
 
@@ -151,13 +154,15 @@ def embolden(text, important_words):
 def exercise_pdf(request):
     exercises = request.session.get('exercises', [])
     version = request.GET.get('version', 'student')  # Default to student version
+    title = request.session.get('title', 'Opdrachten over Morfologie')
 
     template = 'webapp/answers_pdf.html' if version == 'teacher' else 'webapp/exercise_pdf.html'
     filename = f"exercises_{version}.pdf"
 
     # Render template to HTML string
     html = render_to_string(template, {
-        'exercises': exercises
+        'exercises': exercises,
+        'title': title
     })
     
     response = HttpResponse(content_type='application/pdf')
@@ -269,5 +274,19 @@ def add_custom_exercise(request):
         return render(request, 'webapp/partials/added_exercises.html', {
             'exercises': exercises
         })
+        
+    return JsonResponse({'error': 'Invalid request'}, status=405)
+
+def update_title(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        title = data.get('title', '')
+        
+        if not title.strip():
+            return JsonResponse({'error': 'Title cannot be empty'}, status=400)
+            
+        request.session['title'] = title
+        
+        return JsonResponse({'status': 'ok'})
         
     return JsonResponse({'error': 'Invalid request'}, status=405)

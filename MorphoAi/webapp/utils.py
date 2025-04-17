@@ -58,8 +58,14 @@ def exercise_identify(dict_word):
     suffixes = bound['suffixes']
     other = bound['other']
 
+    #pretty print
+    bound_string = ""
+    for cat in bound:
+        if len(bound[cat]) > 0:
+            bound_string += (f"<br>{cat}: {bound[cat]}")
+
     exercise_text = f"Identify the free and bound morphemes in the following word: {word}."
-    answer_text = f"Free morphemes: {free}. Bound morphemes: {bound}"
+    answer_text = f"Free morphemes: {free}. <br>  Bound morphemes: {bound_string}"
     
     return (exercise_text, answer_text)
 
@@ -73,7 +79,7 @@ def exercise_fill_in_the_blank(dict_word):
     }
     """
     word = dict_word['word']
-    prompt = f"Generate a Dutch sentence containing the Dutch word '{word}', but in a changed form. For example, change the tense, make it plural, make it dimminiative, or anything else (but don't add new words to the word). Make sure the sentence is grammatically correct. The sentence should be a complete sentence and not just a fragment. Return your answer formatted as JSON with two keys: sentence (containing the full sentence including the word) and word (containing the modified word)  Do not include any markdown formatting like triple backticks in your answer. Just return the plain text of the sentence."	
+    prompt = f"Generate a Dutch sentence containing the Dutch word '{word}', but in a changed form. For example, change the tense, make it plural or anything else (but don't add new morphemes to the word). Make sure the sentence is grammatically correct. The sentence should be a complete sentence and not just a fragment. Return your answer formatted as JSON with two keys: sentence (containing the full sentence including the word) and word (containing the modified word)  Do not include any markdown formatting like triple backticks in your answer. Just return the plain text of the sentence."	
     output_json = generate_text(prompt)
     output = remove_markdown(output_json)
     output = json.loads(output)
