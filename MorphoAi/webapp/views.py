@@ -7,6 +7,9 @@ from .utils import add_exercises as utils_add_exercises
 from .utils import generate_exercise_given_word as  utils_generate_exercise_given_word
 from django.utils.html import escape, mark_safe
 import re
+from .utils import generate_exercises, generate_exercise_given_word, exercise_plural_form, exercise_singular_form
+from .utils import add_exercises as utils_add_exercises
+from .utils import generate_exercise_given_word as utils_generate_exercise_given_word
 
 
 
@@ -17,8 +20,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 
-exercise_types = ["identify", "fill_in_the_blank", "alternative", "wrong_word_sentence",  "affix_matching"] 
-
+exercise_types = ["identify", "fill_in_the_blank", "alternative", "wrong_word_sentence", "affix_matching", "plural_form", "singular_form"]
 
 def home(request):
     return render(request, 'webapp/home.html')
@@ -42,6 +44,8 @@ def generate(request):
             nr_of_wrong_words = 0
             nr_of_affix = 0
             nr_find_compounds = 0
+            nr_of_plural_form = 0  # New variable for plural exercises
+            nr_of_singular_form = 0  # New variable for singular exercises
 
             if "easy" in difficulty:
                 nr_of_identify += 1
@@ -49,23 +53,40 @@ def generate(request):
                 nr_of_alternative += 1
                 nr_of_wrong_words += 0
                 nr_of_affix += 0
-                nr_find_compounds += 1 
+                nr_find_compounds += 1
+                nr_of_plural_form += 1  # Add 1 plural exercise for easy difficulty
+                nr_of_singular_form += 1
             if "medium" in difficulty:
                 nr_of_identify += 0
                 nr_of_fill_in_blanks += 0
                 nr_of_alternative += 0
                 nr_of_wrong_words += 1
                 nr_of_affix += 1
+                nr_of_plural_form += 1
+                nr_of_singular_form += 1  # Add 1 singular exercise for medium difficulty
             if "hard" in difficulty:
                 nr_of_identify += 0
                 nr_of_fill_in_blanks += 0
                 nr_of_alternative += 0
                 nr_of_wrong_words += 0
                 nr_of_affix += 0
+                nr_of_plural_form += 1
+                nr_of_singular_form += 1
             
             
-            # Generate existing exercises
-            exercises, morphemes, important_words = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative, nr_of_wrong_words, nr_of_affix, nr_find_compounds)            
+            # Generate exercises with the new parameters
+            exercises, morphemes, important_words = generate_exercises(
+                text, 
+                nr_of_identify, 
+                nr_of_fill_in_blanks, 
+                nr_of_alternative, 
+                nr_of_wrong_words, 
+                nr_of_affix, 
+                nr_find_compounds,
+                nr_of_plural_form,  # Add the new parameter
+                nr_of_singular_form  # Add the new parameter
+            )            
+            
             # Store in session
             request.session["text"] = text
             request.session["difficulty"] = difficulty
@@ -143,7 +164,6 @@ def embolden(text, important_words):
                 f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 2)">Fill in the blank</a></li>'
                 f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 3)">Alternative form</a></li>'
                 f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 4)">Wrong word</a></li>'
-                # f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 5)">Affix matching</a></li>'
                 f'  </ul>'
                 f'</div>'
             )
