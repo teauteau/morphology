@@ -41,6 +41,7 @@ def generate(request):
             nr_of_alternative = 0
             nr_of_wrong_words = 0
             nr_of_affix = 0
+            nr_find_compounds = 0
 
             if "easy" in difficulty:
                 nr_of_identify += 1
@@ -48,6 +49,7 @@ def generate(request):
                 nr_of_alternative += 1
                 nr_of_wrong_words += 0
                 nr_of_affix += 0
+                nr_find_compounds += 1 
             if "medium" in difficulty:
                 nr_of_identify += 0
                 nr_of_fill_in_blanks += 0
@@ -63,7 +65,7 @@ def generate(request):
             
             
             # Generate existing exercises
-            exercises, morphemes, important_words = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative, nr_of_wrong_words, nr_of_affix)            
+            exercises, morphemes, important_words = generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative, nr_of_wrong_words, nr_of_affix, nr_find_compounds)            
             # Store in session
             request.session["text"] = text
             request.session["difficulty"] = difficulty

@@ -133,7 +133,7 @@ def exercise_alternative_form(dict_word):
 
     return exercise_text, answer_text
 
-def generate_affix_matching_exercises(morphemes, important_words, count):
+def exercise_generate_affix_matching(morphemes, important_words, count):
     exercises = []
     candidates = []
 
@@ -197,7 +197,6 @@ def generate_affix_matching_exercises(morphemes, important_words, count):
 
     return exercises
 
-
 def exercise_error_correction(dict_word):
     """
     Generates an error correction exercise for a given word dict like {'word': 'run'}
@@ -230,12 +229,28 @@ def exercise_error_correction(dict_word):
 
     return exercise_text, answer_text
 
-def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative_forms, nr_wrong, nr_affix):
+def exercise_find_all(word_type, text):
+    """
+    Generates a find all {word_type} exercise for the given text
+    expects:
+      the full text as text
+      word type from [compound, TODO more types]
+    """
+    prompt = f"Find all {word_type} words in the following Dutch text. Return your answer formatted as a JSON list. Do not include any markdown formatting like triple backticks in your answer. The text: {text}"	
+    output_json = generate_text(prompt)
+    output = remove_markdown(output_json)
+    output = json.loads(output)
+    output = list(dict.fromkeys(output))
+    exercise_text = f"Find all the {word_type} words in the given text."
+    answer_text = output
+    return exercise_text, answer_text
+
+def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative_forms, nr_wrong, nr_affix, nr_find_compounds):
     """
     Generates exercises for the given text 
     returns in format exercises = [(exercise_text, answer_text), ...]
     """
-    total_words_needed = nr_of_identify + nr_of_fill_in_blanks + nr_of_alternative_forms + nr_wrong + 4
+    total_words_needed = nr_of_identify + nr_of_fill_in_blanks + nr_of_alternative_forms + nr_wrong + nr_find_compounds + 4
     important_words = extract_important_words(text, total_words_needed)
     morphemes = extract_morphemes(important_words)
     exercises = []
@@ -253,18 +268,27 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alterna
         exercises.append(exercise)
     word_index += nr_of_fill_in_blanks
 
+    ## Add alternative form exercises
     for i in range(nr_of_alternative_forms):
         exercise = exercise_alternative_form(morphemes[i + word_index])
         exercises.append(exercise)
     word_index += nr_of_alternative_forms
 
+    ## Add error correction exercises
     for i in range(nr_wrong):
         exercise = exercise_error_correction(morphemes[i + word_index])
         exercises.append(exercise)
     word_index += nr_wrong
 
+    # add find all compounds exercises
+    for i in range(nr_find_compounds):
+        exercise = exercise_find_all("compound", text)
+        exercises.append(exercise)
+    word_index += nr_find_compounds
+
+    # add affix matching exercises
     if nr_affix > 0:
-        exercise = generate_affix_matching_exercises(morphemes, important_words, 4)
+        exercise = exercise_generate_affix_matching(morphemes, important_words, 4)
         exercises.extend(exercise)
         print(exercise)
 
@@ -314,7 +338,7 @@ def add_exercises(type, nr_of_exercises, morphemes, index=0):
         if nr_of_exercises > 0:
             important_words = [m.get('word', '') for m in morphemes if 'word' in m]
             nr_of_words = 4 if len(morphemes) > 4 else len(morphemes)
-            matching_exercises = generate_affix_matching_exercises(morphemes, important_words, nr_of_words)
+            matching_exercises = exercise_generate_affix_matching(morphemes, important_words, nr_of_words)
             exercises.extend(matching_exercises)
     else:
         raise ValueError("Invalid exercise type.")
@@ -333,7 +357,7 @@ def generate_exercise_given_word(word, exercise_type):
     elif exercise_type == 4:
         exercise = exercise_error_correction(morphemes[0])
     # elif exercise_type == 5:
-    #     exercise = generate_affix_matching_exercises(morphemes[0])
+    #     exercise = exercise_generate_affix_matching(morphemes[0])
     else:
         raise ValueError("Invalid exercise type.")
     return exercise
