@@ -71,7 +71,7 @@ body, .dropdown, .card-body {
             <div class="card shadow-sm mb-4">
                 <div class="card-body pl-4 pr-4">
                     <h4 class="card-title mb-3">Ingevoerde Tekst</h4>
-                    <div class="card-text text-muted text-start">{{ text|safe }}</div>
+                    <div class="card-text text-muted text-start">{{ text_html|safe }}</div>
                 </div>
             </div>
 
@@ -97,9 +97,9 @@ body, .dropdown, .card-body {
                         Add  generated exercises
                     </button>
                     <div class="collapse mt-2" id="addExercisesCollapse">
-                        {% for exercise_type in exercise_types %}
+                        {% for exercise_type, exercise_name in exercise_types.items %}
                             <div class="form-group row justify-content-center mb-2">
-                                <label for="exercise{{forloop.counter}}" class="col-sm-4 col-form-label text-right">{{exercise_type}}</label>
+                                <label for="exercise{{forloop.counter}}" class="col-sm-4 col-form-label text-right">{{exercise_name}}</label>
                                 <div class="col-sm-6">
                                     <input type="number" class="form-control exercise-input" id="{{exercise_type}}" min="0" max="5" step="1" value="0" minlength="1">
                                 </div>
@@ -336,6 +336,7 @@ function titleEdit(){
     const index = parseInt(button.getAttribute("data-index"));
     deleteExercise(index);
   }
+  const text = "{{text|escapejs}}";
 
   // <!-- Add exercises -->
   document.getElementById('generate-new-exercises-btn').addEventListener('click', function() {
@@ -354,7 +355,7 @@ function titleEdit(){
               'X-Requested-With': 'XMLHttpRequest',  // Explicit header
               'X-CSRFToken': '{{ csrf_token }}'
           },
-          body: JSON.stringify({exercises: exercises})
+          body: JSON.stringify({exercises: exercises, text: text})
       })
         .then(response => response.text())
         .then(html => {

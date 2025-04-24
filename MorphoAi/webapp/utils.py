@@ -3,6 +3,7 @@ from .keys import gemini_API_key
 import json
 import re
 import random
+import spacy
 
 
 client = genai.Client(api_key=gemini_API_key)
@@ -34,7 +35,7 @@ def extract_morphemes(words):
     prompt = f"Identify the morphemes in the following Dutch words and structure the result as a JSON object. The JSON should contain a 'words' list, where each word is represented as an object with three keys: 'word' (containing the word), 'free' (for free morphemes) and 'bound' (for bound morphemes). The 'bound' morphemes should be further categorized into 'prefixes', 'suffixes', and 'other'. DO NOT include markdown JSON formatting syntax like triple backticks in your answer. Only return the JSON structure as plain text. Words:\n{words}"
     morphemes_string = generate_text(prompt)
     morphemes_string = remove_markdown(morphemes_string)
-    print(morphemes_string)
+    # print(morphemes_string)
     morphemes = json.loads(morphemes_string)['words']
     return morphemes
 
@@ -255,53 +256,56 @@ def exercise_plural_form(dict_word):
     # Simplified prompt that just asks for the plural form
     prompt = (
         f"What is the plural form of the Dutch word '{word}'? "
-        f"Return ONLY the plural form as plain text. If the word doesn't have a "
-        f"typical plural form, make your best guess at what it would be "
-        f"following Dutch grammar patterns. Don't include explanations."
+        f"Return ONLY the plural form as plain text. Don't include explanations. "
+        f"If the word does not have any plural form, return the word itself. "
+        f"If the word is already in plural form, return the word 'PLURAL'"  
     )
     
-    try:
-        plural_form = generate_text(prompt).strip()
+    # try:
+    plural_form = generate_text(prompt).strip()
+    print(f"singular: {word}, plural form: {plural_form}")
+    if plural_form == "PLURAL":
+        return None, None
         
-        # Basic validation - just make sure we got a non-empty result
-        if not plural_form or plural_form == word:
-            # If LLM returns the same word or empty string, try a different approach
-            backup_prompt = (
-                f"Create the plural form of the Dutch word '{word}' by applying "
-                f"standard Dutch pluralization rules (typically adding -en or -s). "
-                f"Return ONLY the pluralized word."
-            )
-            plural_form = generate_text(backup_prompt).strip()
+    #     # Basic validation - just make sure we got a non-empty result
+    #     if not plural_form or plural_form == word:
+    #         # If LLM returns the same word or empty string, try a different approach
+    #         backup_prompt = (
+    #             f"Create the plural form of the Dutch word '{word}' by applying "
+    #             f"standard Dutch pluralization rules (typically adding -en or -s). "
+    #             f"Return ONLY the pluralized word."
+    #         )
+    #         plural_form = generate_text(backup_prompt).strip()
         
-        # Extra safety - if we still don't have a result, make a simple guess
-        if not plural_form or plural_form == word:
-            # Simple heuristic fallback
-            if word.endswith('e'):
-                plural_form = word + 'n'
-            elif word.endswith(('s', 'f', 'ch')):
-                plural_form = word + 'en'
-            else:
-                plural_form = word + 's'
+    #     # Extra safety - if we still don't have a result, make a simple guess
+    #     if not plural_form or plural_form == word:
+    #         # Simple heuristic fallback
+    #         if word.endswith('e'):
+    #             plural_form = word + 'n'
+    #         elif word.endswith(('s', 'f', 'ch')):
+    #             plural_form = word + 'en'
+    #         else:
+    #             plural_form = word + 's'
         
-        # Build the exercise and answer
-        exercise_text = f"Give the plural form of the word: {word}"
-        answer_text = plural_form
+    #     # Build the exercise and answer
+    #     exercise_text = f"Give the plural form of the word: {word}"
+    #     answer_text = plural_form
         
-        return exercise_text, answer_text
+    #     return exercise_text, answer_text
         
-    except Exception as e:
-        print(f"Error in plural form exercise for '{word}': {e}")
-        # Fallback to a simple heuristic if everything else fails
-        if word.endswith('e'):
-            plural_form = word + 'n'
-        elif word.endswith(('s', 'f', 'ch')):
-            plural_form = word + 'en'
-        else:
-            plural_form = word + 's'
+    # except Exception as e:
+    #     print(f"Error in plural form exercise for '{word}': {e}")
+    #     # Fallback to a simple heuristic if everything else fails
+    #     if word.endswith('e'):
+    #         plural_form = word + 'n'
+    #     elif word.endswith(('s', 'f', 'ch')):
+    #         plural_form = word + 'en'
+    #     else:
+    #         plural_form = word + 's'
             
-        exercise_text = f"Give the plural form of the word: {word}"
-        answer_text = plural_form
-        return exercise_text, answer_text
+    exercise_text = f"Give the plural form of the word: {word}"
+    answer_text = plural_form
+    return exercise_text, answer_text
         
 def exercise_singular_form(dict_word):
     """
@@ -362,6 +366,20 @@ def exercise_singular_form(dict_word):
         answer_text = singular_form
         return exercise_text, answer_text
 
+def find_specific_POS(pos_tag, dict_words):
+    """
+    Finds all words with a specific part of speech (POS) tag in the given list of words.
+    Uses spaCy for POS tagging.
+    """
+    nlp = spacy.load("nl_core_news_sm")
+    list = []
+    for word in dict_words:
+        doc = nlp(word['word'])
+        for token in doc:
+            if token.pos_ == pos_tag:
+                list.append(word)
+    return list
+
 def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative_forms, nr_wrong, nr_affix, nr_find_compounds, nr_of_plural=0, nr_of_singular=0):
     """
     Generates exercises for the given text 
@@ -402,21 +420,22 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alterna
         exercise = exercise_find_all("compound", text)
         exercises.append(exercise)
     word_index += nr_find_compounds
-    
-    # Add plural form exercises
-    if nr_of_plural > 0:
-        plural_exercises = []
-        for i in range(min(nr_of_plural, len(morphemes) - word_index)):
-            # Try to find words with plural forms
-            for j in range(len(morphemes) - word_index):
-                idx = (i + j + word_index) % len(morphemes)
-                exercise = exercise_plural_form(morphemes[idx])
-                if exercise:  # If we found a valid exercise
-                    plural_exercises.append(exercise)
-                    break
-        exercises.extend(plural_exercises)
-        word_index += nr_of_plural
-    
+
+    # add plural form exercises
+    nouns = find_specific_POS("NOUN", morphemes) # find all nouns in the important words
+    i = 0
+    count = 0
+    while count < nr_of_plural:
+        if i + word_index >= len(nouns):
+            print("ERROR: not enough nouns for plural form exercises")
+            break
+        exercise = exercise_plural_form(nouns[i + word_index])
+        if exercise != (None, None):
+            exercises.append(exercise)
+            count += 1  # only increase when successful
+        i += 1  # always move to the next noun
+    word_index += nr_of_plural
+
     # Add singular form exercises
     if nr_of_singular > 0:
         singular_exercises = []
@@ -441,7 +460,7 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alterna
     
 
 
-def add_exercises(type, nr_of_exercises, morphemes, index=0):
+def add_exercises(type, nr_of_exercises, morphemes, text, index=0):
     """
     Adds exercises to the list of exercises based on the type and number of exercises
     """
@@ -476,18 +495,39 @@ def add_exercises(type, nr_of_exercises, morphemes, index=0):
             exercise = exercise_error_correction(morphemes[j])
             if exercise:  # Check if exercise is not None
                 exercises.append(exercise)
+
+    elif type == "find_compounds":
+        for i in range(nr_of_exercises):
+            j = (i + index - 1) % len(morphemes)
+            exercise = exercise_find_all("compound", text)
+            exercises.append(exercise)
     
     elif type == "plural_form":
-        # Add plural form exercises
-        for i in range(nr_of_exercises):
-            # Try words until we find one with a plural form or we've tried them all
-            valid_exercise = None
-            for attempt in range(len(morphemes)):
-                j = (i + index - 1 + attempt) % len(morphemes)
-                valid_exercise = exercise_plural_form(morphemes[j])
-                if valid_exercise:  # If we found a valid plural exercise
-                    exercises.append(valid_exercise)
-                    break
+        nouns = find_specific_POS("NOUN", morphemes) # find all nouns in the important words
+        i = 0
+        count = 0
+        while count < nr_of_exercises:
+            j = (i + index - 1) % len(nouns)
+            if i >= len(nouns):
+                print("ERROR: not enough nouns for plural form exercises")
+                break
+            exercise = exercise_plural_form(nouns[j])
+            if exercise != (None, None):
+                exercises.append(exercise)
+                count += 1  # only increase when successful
+            i += 1  # always move to the next noun
+
+    # elif type == "plural_form":
+    #     # Add plural form exercises
+    #     for i in range(nr_of_exercises):
+    #         # Try words until we find one with a plural form or we've tried them all
+    #         valid_exercise = None
+    #         for attempt in range(len(morphemes)):
+    #             j = (i + index - 1 + attempt) % len(morphemes)
+    #             valid_exercise = exercise_plural_form(morphemes[j])
+    #             if valid_exercise:  # If we found a valid plural exercise
+    #                 exercises.append(valid_exercise)
+    #                 break
     
     elif type == "singular_form":
         # Add singular form exercises
@@ -513,19 +553,21 @@ def add_exercises(type, nr_of_exercises, morphemes, index=0):
     
     return exercises
 
+
+
 def generate_exercise_given_word(word, exercise_type):
     morphemes = extract_morphemes([word])
     exercise = []
     print(exercise_type)
-    if exercise_type == 1:
+    if exercise_type == "identify":
         exercise = exercise_identify(morphemes[0])
-    elif exercise_type == 2:
+    elif exercise_type == "fill_in_the_blank":
         exercise = exercise_fill_in_the_blank(morphemes[0])
-    elif exercise_type == 3:
+    elif exercise_type == "alternative":
         exercise = exercise_alternative_form(morphemes[0])
-    elif exercise_type == 4:
+    elif exercise_type == "wrong_word_sentence":
         exercise = exercise_error_correction(morphemes[0])
-    elif exercise_type == 5:
+    elif exercise_type == "plural_form":
         # For plural form
         result = exercise_plural_form(morphemes[0])
         if result:
@@ -533,7 +575,7 @@ def generate_exercise_given_word(word, exercise_type):
         else:
             # Fallback if the word doesn't have a plural form
             exercise = ("This word doesn't have a meaningful plural form.", "N/A")
-    elif exercise_type == 6:
+    elif exercise_type == "singular_form":
         # For singular form
         result = exercise_singular_form(morphemes[0])
         if result:
@@ -542,7 +584,7 @@ def generate_exercise_given_word(word, exercise_type):
             # Fallback if the word isn't plural or doesn't have a singular form
             exercise = ("This word isn't in plural form.", "N/A")
     else:
-        raise ValueError("Invalid exercise type.")
+        raise ValueError(f"Invalid exercise type. :{exercise_type}")
     return exercise
     
 # example text 

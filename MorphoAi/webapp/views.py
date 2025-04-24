@@ -20,7 +20,18 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 
-exercise_types = ["identify", "fill_in_the_blank", "alternative", "wrong_word_sentence", "affix_matching", "plural_form", "singular_form"]
+exercise_types = {"identify": "Identificeer morfemen",
+                   "fill_in_the_blank": "Invullen",
+                   "alternative": "Alternatieve vorm",
+                   "wrong_word_sentence": "Fout woord in zin",
+                   "affix_matching": "Achtervoegsels matchen",
+                   "find_compounds": "Vind alle samenstellingen",
+                   "plural_form": "Meervoudsvorm",
+                   "singular_form": "Enkelvoudsvorm"}
+
+# these exercise types are not used in the dropdown menu (use this for exercises that do not depend on a single word)
+exercise_types_ignore = ["affix_matching", "find_compounds"]
+
 
 def home(request):
     return render(request, 'webapp/home.html')
@@ -53,17 +64,20 @@ def generate(request):
                 nr_of_alternative += 1
                 nr_of_wrong_words += 0
                 nr_of_affix += 0
-                nr_find_compounds += 1
-                nr_of_plural_form += 1  # Add 1 plural exercise for easy difficulty
+                nr_of_plural_form += 1  
                 nr_of_singular_form += 1
+                nr_find_compounds += 1
+
             if "medium" in difficulty:
                 nr_of_identify += 0
                 nr_of_fill_in_blanks += 0
                 nr_of_alternative += 0
                 nr_of_wrong_words += 1
                 nr_of_affix += 1
+                nr_find_compounds += 1
                 nr_of_plural_form += 1
-                nr_of_singular_form += 1  # Add 1 singular exercise for medium difficulty
+                nr_of_singular_form += 1
+
             if "hard" in difficulty:
                 nr_of_identify += 0
                 nr_of_fill_in_blanks += 0
@@ -72,6 +86,8 @@ def generate(request):
                 nr_of_affix += 0
                 nr_of_plural_form += 1
                 nr_of_singular_form += 1
+                nr_find_compounds += 1
+
             
             
             # Generate exercises with the new parameters
@@ -133,9 +149,10 @@ def results_page(request):
     exercise_types = request.session.get("exercise_types", [])
     important_words = request.session.get("important_words", [])
 
-    text = embolden(text, important_words)
+    text_html = embolden(text, important_words)
 
     return render(request, "webapp/results.html", {
+        "text_html": text_html,
         "text": text,
         "difficulty": difficulty,
         "exercises": exercises,
@@ -145,30 +162,25 @@ def results_page(request):
 
 
 def embolden(text, important_words):
+    # filter out any exercise types that are not in the dropdown menu
+    filtered_exercise_types = {
+        k: v for k, v in exercise_types.items() if k not in exercise_types_ignore
+    }
+    
     important_set = {w.lower() for w in important_words}
     tokens = re.findall(r'\w+|\W+', text)
-
     wrapped_tokens = []
     for idx, token in enumerate(tokens):
         if token.strip().isalnum():
-            word_class = "word bold" if token.lower() in important_set else "word"
-            wrapped = (
-                f'<div class="d-inline dropdown">'
-                f'  <span class="{word_class}" role="button" id="dropdownWord{idx}" '
-                f'        data-bs-toggle="dropdown" aria-expanded="false" data-word="{token}">'
-                f'    {token}'
-                f'  </span>'
-                f'  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownWord{idx}">'
-                f'    <li><h6 class="dropdown-header">Choose an exercise for <i>{token}</i></h6></li>'
-                f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 1)">Identify</a></li>'
-                f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 2)">Fill in the blank</a></li>'
-                f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 3)">Alternative form</a></li>'
-                f'    <li><a class="dropdown-item" href="#" onclick="handleOption(\'{token}\', 4)">Wrong word</a></li>'
-                f'  </ul>'
-                f'</div>'
-            )
+            context = {
+                'token': token,
+                'token_id': idx,
+                'is_important': token.lower() in important_set,
+                'exercise_types': filtered_exercise_types,
+            }
+            wrapped = render_to_string('webapp/partials/dropdown.html', context)
         else:
-            wrapped = token  # punctuation/space
+            wrapped = token
         wrapped_tokens.append(wrapped)
 
     return mark_safe(''.join(wrapped_tokens))
@@ -209,14 +221,15 @@ def add_exercises(request):
             data = json.loads(request.body)
             exercises_types = data.get('exercises', [])
             old_exercises = request.session.get('exercises', [])
+            text = request.session.get('text', '')
             print("exercise_types: ", exercises_types)
             new_exercises = []
             for i, exercise in enumerate(exercises_types):
                 exercise_count = int(exercise.get('count', 0)) if exercise.get('count', '').strip() else 0
                 exercise_type = exercise.get('type', 'identify')
                 index = len(old_exercises) / len(exercise_types)
-                generated_exercises = utils_add_exercises(exercise_type, exercise_count, request.session.get("morphemes", [{'word': 'foutje', 'free': ['fout'], 'bound': {'prefixes': [], 'suffixes': ['je'], 'other': []}}]), index)
-                print(generated_exercises)
+                generated_exercises = utils_add_exercises(exercise_type, exercise_count, request.session.get("morphemes", [{'word': 'foutje', 'free': ['fout'], 'bound': {'prefixes': [], 'suffixes': ['je'], 'other': []}}]), text=text, index=index)
+                # print(generated_exercises)
                 new_exercises.extend(generated_exercises)
             combined_exercises = old_exercises + new_exercises
             request.session['exercises'] = combined_exercises

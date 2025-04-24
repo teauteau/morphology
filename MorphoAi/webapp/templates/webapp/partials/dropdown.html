@@ -1,0 +1,20 @@
+<div class="d-inline dropdown">
+    <span class="word {% if is_important %}bold{% endif %}"
+          role="button"
+          id="dropdownWord{{ token_id }}"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+          data-word="{{ token }}">
+      {{ token }}
+    </span>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownWord{{ token_id }}">
+        <li><h6 class="dropdown-header">Choose an exercise for <i>{{ token }}</i></h6></li>
+        {% for exercise_type, exercise_name in exercise_types.items %}
+                <li>
+                <a class="dropdown-item" href="#" onclick="sendToBackend('{{ token }}', '{{ exercise_type }}')">
+                    {{ exercise_name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+  </div>
