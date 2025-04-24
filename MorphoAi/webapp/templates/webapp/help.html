@@ -1,43 +1,103 @@
 {% extends 'webapp/base.html' %}
-{% block title %}Help - MorphoAI{% endblock %}
+{% block title %}Help - MorKI{% endblock %}
 {% block content %}
 <div class="container mt-5 text-center">
     <h1 class="display-4">Veelgestelde vragen</h1>
-    <p class="lead text-muted">Hier vindt u antwoorden op de meest gestelde vragen over MorphoAI.</p>
+    <p class="lead text-muted">Hier vindt u antwoorden op de meest gestelde vragen over MorKI.</p>
     <div class="accordion mt-4" id="faqAccordion">
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#q1">
-                    Hoe werkt MorphoAI?
+                    Wat is MorKI?
                 </button>
             </h2>
             <div id="q1" class="accordion-collapse collapse show">
                 <div class="accordion-body">
-                    MorphoAI analyseert een ingevoerde tekst en genereert oefeningen op basis van morfologie.
+                    MorKI is een website waarmee Nederlandse morfologie oefeningen van verschillende moeilijkheidsniveaus automatisch gegenereerd kunnen worden. Hiermee kunnen basisschoolleraren het leesbegrip en de woordenschat van leerlingen verbeteren.
                 </div>
             </div>
         </div>
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#q2">
-                    Kan ik mijn eigen oefeningen aanpassen?
+                    Hoe werkt MorKI?
                 </button>
             </h2>
             <div id="q2" class="accordion-collapse collapse">
                 <div class="accordion-body">
-                    Ja, docenten kunnen oefeningen selecteren en aanpassen voordat ze worden geëxporteerd.
+                    MorKI gebruikt grote taalmodellen (<i>Large Language Models</i>) om Nederlandse teksten te analyseren, morfemen (voorvoegsels, achtervoegsels en grondwoorden) te identificeren en op maat gemaakte oefeningen te genereren met verschillende moeilijkheidsgraden op basis van de taxonomie van Bloom.
                 </div>
             </div>
         </div>
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#q3">
-                    Worden mijn gegevens opgeslagen?
+                    Voor wie is MorKI bedoeld?
                 </button>
             </h2>
             <div id="q3" class="accordion-collapse collapse">
                 <div class="accordion-body">
-                    Nee, MorphoAI slaat geen ingevoerde teksten of oefeningen op. Alles gebeurt lokaal op uw apparaat.
+                    MorKI is bedoeld voor Nederlandse basisschoolleraren. In het bijzonder voor leerkrachten van groep 6 tot en met 8 (kinderen van 9 tot en met 12 jaar) die morfologie onderwijs efficiënter in hun taalcurriculum willen integreren.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#q4">
+                    Is er een limiet qua tekstgrootte voor de teksten die ik in de oefeningen generator kan invoeren?
+                </button>
+            </h2>
+            <div id="q4" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    MorKI kan een zeer grote hoeveelheid tekst verwerken; zo'n 90.000 tot 100.000 woorden tegelijk! Dat is vergelijkbaar met het lezen van meerdere boeken tegelijk. Je kunt dus probleemloos zeer lange documenten invoeren om oefeningen te genereren.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#q5">
+                    Kan ik zelf woorden uit de tekst selecteren om oefeningen mee te maken?
+                </button>
+            </h2>
+            <div id="q5" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    Ja! Je kunt met je muis over de invoertekst bewegen en zo woorden uit de tekst selecteren. Je kunt hierbij zelfs het type oefening kiezen dat je wilt toevoegen.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#q6">
+                    Kan ik wijzigingen aanbrengen in de door MorKI gegenereerde oefeningen?
+                </button>
+            </h2>
+            <div id="q6" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    Ja! Met MorKI kan je verschillende soorten wijzigingen toepassen op de gegenereerde oefeningen. Je kunt oefeningen toevoegen, wijzigen of verwijderen, en ook je eigen gemaakte oefeningen toevoegen.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#q7">
+                    Is het mogelijk om de opdrachten met daarbij ook de antwoorden te printen?
+                </button>
+            </h2>
+            <div id="q7" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    Ja! MorKI biedt je de mogelijkheid om zowel de docentenversie met de opdrachten en antwoorden te downloaden als de studentenversie met enkel de opdrachten.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#q8">
+                    Kan ik de oefeningen als een Microsoft Office Word-document krijgen?
+                </button>
+            </h2>
+            <div id="q8" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    Ja! Kopieer en plak de oefeningen eenvoudig uit het pdf-bestand naar een Word-document. Selecteer tijdens het plakken de optie 'Alleen tekst behouden' om de juiste opmaak te garanderen.
                 </div>
             </div>
         </div>
