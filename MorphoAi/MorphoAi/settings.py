@@ -122,7 +122,7 @@ STATIC_URL = '/static/'
 
 # For development (DEBUG=True)
 STATICFILES_DIRS = [
-    # os.path.join(BASE_DIR, 'static'),  # Global static folder
+    os.path.join(BASE_DIR, 'static'),  # Global static folder
     os.path.join(BASE_DIR, 'webapp/static'),  # App-specific static (if used)
 ]
 

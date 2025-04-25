@@ -1,7 +1,8 @@
 {% extends 'webapp/base.html' %}
-{% block title %}Resultaten - MorphoAI{% endblock %}
+{% block title %}Resultaten - MorKI{% endblock %}
 
 {% block content %}
+{% load custom_tags %}
 
 <style>
   .results-wrapper {
@@ -93,13 +94,14 @@ body, .dropdown, .card-body {
                         {% include 'webapp/partials/added_exercises.html' %}
                     </div>
 
+                    <!-- Add Exercises Form -->
                     <button class="btn btn-outline-primary btn-sm mt-4" type="button" data-bs-toggle="collapse" data-bs-target="#addExercisesCollapse" aria-expanded="false" aria-controls="addExercisesCollapse">
-                        Add  generated exercises
+                        Add generated exercises
                     </button>
                     <div class="collapse mt-2" id="addExercisesCollapse">
                         {% for exercise_type, exercise_name in exercise_types.items %}
                             <div class="form-group row justify-content-center mb-2">
-                                <label for="exercise{{forloop.counter}}" class="col-sm-4 col-form-label text-right">{{exercise_name}}</label>
+                                <label for="exercise{{forloop.counter}}" class="col-sm-4 col-form-label text-right" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="<i>Bijv. {{ exercise_examples|dict_get:exercise_type }}</i>">{{exercise_name}}</label>
                                 <div class="col-sm-6">
                                     <input type="number" class="form-control exercise-input" id="{{exercise_type}}" min="0" max="5" step="1" value="0" minlength="1">
                                 </div>
@@ -145,21 +147,24 @@ body, .dropdown, .card-body {
     </div>
 </div>
 
+
 <script>
-  function handleOption(word, option) {
-      if (option === 1) {
-          sendToBackend(word, option);
-      } else if (option === 2) {
-          sendToBackend(word, option);
-      } else if (option === 3) {
-          sendToBackend(word, option);
-      } else if (option === 4) {
-          sendToBackend(word, option);
-      }
-      // } else if (option === 5) {
-      //     sendToBackend(word, option);
-      // }
-  }
+
+
+//   function handleOption(word, option) {
+//       if (option === 1) {
+//           sendToBackend(word, option);
+//       } else if (option === 2) {
+//           sendToBackend(word, option);
+//       } else if (option === 3) {
+//           sendToBackend(word, option);
+//       } else if (option === 4) {
+//           sendToBackend(word, option);
+//       }
+//       // } else if (option === 5) {
+//       //     sendToBackend(word, option);
+//       // }
+//   }
 
   function sendToBackend(word, option) {
       fetch("{% url 'generate_exercise_given_word' %}", {
@@ -205,7 +210,16 @@ body, .dropdown, .card-body {
    
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+<script> 
+// Initialize Bootstrap tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+
+</script>
 <script>
 
 function titleEdit(){
@@ -441,4 +455,8 @@ function titleEdit(){
       }
   });
 </script>
+
+
+
+
 {% endblock %}

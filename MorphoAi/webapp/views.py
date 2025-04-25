@@ -32,6 +32,16 @@ exercise_types = {"identify": "Identificeer morfemen",
 # these exercise types are not used in the dropdown menu (use this for exercises that do not depend on a single word)
 exercise_types_ignore = ["affix_matching", "find_compounds"]
 
+# example for each exercise type
+exercise_examples = {"identify" : "Identificeer de morfemen in het woord 'onvergetelijk'.",
+                      "fill_in_the_blank" : "(mooi) Het was een ____ dag.",
+                      "alternative" : "Vind woorden die de morfeem 'over' bevatten",
+                      "wrong_word_sentence" : "De hond is een 'onvergetelijke' huisdier.",
+                      "affix_matching" : "Koppel de juiste achtervoegsels aan de woorden.",
+                      "find_compounds" : "Vind alle samenstellingen in de tekst.",
+                      "plural_form" : "Wat is de meervoudsvorm van 'boek'?",
+                      "singular_form" : "Wat is de enkelvoudsvorm van 'boeken'?"}
+
 
 def home(request):
     return render(request, 'webapp/home.html')
@@ -55,18 +65,21 @@ def generate(request):
             nr_of_wrong_words = 0
             nr_of_affix = 0
             nr_find_compounds = 0
-            nr_of_plural_form = 0  # New variable for plural exercises
-            nr_of_singular_form = 0  # New variable for singular exercises
+            nr_of_plural_form = 0  
+            nr_of_singular_form = 0 
+            
+            if "easy_extra" in difficulty:
+                nr_of_identify += 1
 
             if "easy" in difficulty:
-                nr_of_identify += 1
+                nr_of_identify += 0
                 nr_of_fill_in_blanks += 1
                 nr_of_alternative += 1
                 nr_of_wrong_words += 0
                 nr_of_affix += 0
-                nr_of_plural_form += 1  
-                nr_of_singular_form += 1
-                nr_find_compounds += 1
+                nr_of_plural_form += 0  
+                nr_of_singular_form += 0
+                nr_find_compounds += 0
 
             if "medium" in difficulty:
                 nr_of_identify += 0
@@ -99,8 +112,8 @@ def generate(request):
                 nr_of_wrong_words, 
                 nr_of_affix, 
                 nr_find_compounds,
-                nr_of_plural_form,  # Add the new parameter
-                nr_of_singular_form  # Add the new parameter
+                nr_of_plural_form,  
+                nr_of_singular_form  
             )            
             
             # Store in session
@@ -157,6 +170,7 @@ def results_page(request):
         "difficulty": difficulty,
         "exercises": exercises,
         "exercise_types": exercise_types,
+        "exercise_examples": exercise_examples,
         "title" : title
     })
 
