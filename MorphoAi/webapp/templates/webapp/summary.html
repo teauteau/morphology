@@ -1,30 +1,132 @@
 {% extends 'webapp/base.html' %}
 {% block title %}Summary - MorKI{% endblock %}
 {% block content %}
-<div class="container mt-5">
-    <h1 class="display-4 text-center">Morfologie van de Nederlandse Taal</h1>
-    <p class="lead text-muted text-center">Een korte introductie tot de structuur en vorming van Nederlandse woorden.</p>
 
-    <div class="mt-4">
-        <h2 class="h4">Wat is morfologie?</h2>
-        <p style=" text-align: left;">Morfologie is de tak van de taalkunde die zich bezighoudt met de structuur, vorming en betekenis van woorden. In het Nederlands spelen morfemen, de kleinste betekenisvolle eenheden van taal, een centrale rol.</p>
+<style>
+    /* Animations and styling */
+    .fade-in {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card {
+        border-radius: 1rem;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
+    }
+
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.4em 0.6em;
+        border-radius: 0.5rem;
+    }
+
+    .alert-secondary {
+        border-left: 5px solid #0d6efd;
+        background-color: #f1f5ff;
+    }
+
+    .text-highlight {
+        color: #0d6efd;
+        font-weight: bold;
+    }
+
+    .list-style-circle li {
+        list-style-type: circle;
+    }
+</style>
+
+<div class="container mt-5 fade-in">
+    <h1 class="display-4 text-center text-primary mb-3">🌱 Morfologie van de Nederlandse Taal</h1>
+    <p class="lead text-muted text-center mb-5">Een korte en kleurrijke introductie tot de opbouw van Nederlandse woorden.</p>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h4">📘 Wat is morfologie?</h2>
+            <p>Morfologie is de tak van de taalkunde die zich bezighoudt met de structuur, vorming en betekenis van woorden. 
+            De kleinste betekenisvolle eenheden in taal noemen we <span class="badge bg-info text-dark">morfemen</span>.</p>
+        </div>
     </div>
 
-    <div class="mt-4">
-        <h2 class="h4">Soorten Morfemen</h2>
-        <ul >
-            <li style=" text-align: left;"><strong>Vrije morfemen:</strong> Woorden die op zichzelf kunnen staan, zoals "huis" of "lopen".</li>
-            <li style=" text-align: left;"><strong>Gebonden morfemen:</strong> Woorddelen die niet zelfstandig voorkomen, zoals voor- en achtervoegsels ("on-" in "ongezond", "-heid" in "vrijheid").</li>
-        </ul>
+    <div class="row g-4">
+        <div class="col-md-6 fade-in">
+            <div class="card border-success h-100">
+                <div class="card-body">
+                    <h2 class="h5 text-success">🔓 Vrije Morfemen</h2>
+                    <p>Kunnen zelfstandig als woord voorkomen, zoals <strong>huis</strong> of <strong>paard</strong>. Deze zijn niet verder op te splitsen in betekenisvolle delen.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 fade-in">
+            <div class="card border-warning h-100">
+                <div class="card-body">
+                    <h2 class="h5 text-warning">🔒 Gebonden Morfemen</h2>
+                    <p>Kunnen niet zelfstandig staan en worden aan andere woorden gekoppeld, zoals <em>-ig</em>, <em>-heid</em>, <em>-tje</em>. Ze geven extra betekenis of grammaticale functie.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="mt-4">
-        <h2 class="h4">Woordvorming in het Nederlands</h2>
-        <ul >
-            <li style=" text-align: left;"><strong>Samenstellingen:</strong> Twee of meer woorden gecombineerd tot een nieuw woord (bijv. "boekenwinkel").</li>
-            <li style=" text-align: left;"><strong>Afleidingen:</strong> Woorden die gevormd worden met voor- of achtervoegsels (bijv. "gezondheid", "onmogelijk").</li>
-            <li style=" text-align: left;"><strong>Flexie:</strong> Veranderingen in een woord door vervoeging of verbuiging (bijv. "loop" → "loopt").</li>
-        </ul>
+    <div class="card shadow-sm mt-5 mb-4 fade-in">
+        <div class="card-body">
+            <h2 class="h4">⚙️ Morfologische Procedures</h2>
+            <ol class="mt-3 list-style-circle">
+                <li class="mb-3">
+                    <strong>🧩 Samenstelling:</strong><br>
+                    <em>land</em> + <em>kaart</em> = <strong>landkaart</strong> (twee vrije morfemen → nieuw woord)
+                </li>
+                <li class="mb-3">
+                    <strong>🛠️ Afleiding:</strong><br>
+                    <em>land</em> + <em>-ing</em> = <strong>landing</strong> (nieuw woord door toevoeging van gebonden morfeem)<br>
+                    Ook: <em>ziel</em> + <em>-ig</em> = bijvoeglijk naamwoord
+                </li>
+                <li class="mb-3">
+                    <strong>🎛️ Verbuiging:</strong><br>
+                    <em>huis</em> → <em>huisje</em>, <em>mooi</em> → <em>mooie</em><br>
+                    Geen nieuw woord, maar grammaticale aanpassing.
+                </li>
+                <li class="mb-3">
+                    <strong>🔄 Vervoeging:</strong><br>
+                    <em>land</em> + <em>-t</em> = <strong>landt</strong> (2e/3e persoon enkelvoud werkwoord)
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="alert alert-secondary fade-in">
+        ✨ Met samenstellingen, afleidingen, leenwoorden en creatieve vormen zoals <strong>halvarine</strong> breidt de woordenschat zich uit. 
+        Andere talen gebruiken andere regels!
+    </div>
+
+    <div class="card mt-4 shadow-sm fade-in">
+        <div class="card-body">
+            <h2 class="h4">📝 Spelling en het Morfologisch Principe</h2>
+            <p>In de Nederlandse spelling wordt het <strong>morfologisch principe</strong> toegepast: morfemen worden altijd hetzelfde gespeld, ook als de uitspraak verandert.</p>
+            <p><em>land</em> schrijven we met een <strong>d</strong> (niet “lant”), omdat in <em>landen</em> die <strong>d</strong> behouden blijft.</p>
+        </div>
+    </div>
+
+    <div class="card mt-5 bg-light fade-in">
+        <div class="card-body">
+            <h2 class="h5 text-secondary">📚 Overzicht</h2>
+            <ul class="mb-0">
+                <li><strong>Morfologie:</strong> De studie van woordstructuur.</li>
+                <li><strong>Morfeem:</strong> Kleinste betekenisvolle eenheid van taal.</li>
+                <li><span class="badge bg-success">Vrije Morfemen</span>: zelfstandige woorden (bv. <em>paard</em>)</li>
+                <li><span class="badge bg-warning text-dark">Gebonden Morfemen</span>: alleen met andere woorden (bv. <em>-heid</em>)</li>
+            </ul>
+        </div>
     </div>
 </div>
 {% endblock %}
