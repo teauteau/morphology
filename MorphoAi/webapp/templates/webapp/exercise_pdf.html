@@ -17,17 +17,23 @@
             text-align: center;
             margin-bottom: 1.5cm;
         }
-        .exercise {
+        .exercise-group {
             margin-bottom: 1cm;
+        }
+        .group-heading {
+            font-weight: bold;
+            font-size: 14pt;
+            margin-bottom: 0.5cm;
+        }
+        .exercise-item {
+            margin-bottom: 0.5cm;
             page-break-inside: avoid;
         }
-       
         .page-break {
             page-break-after: always;
         }
     </style>
 </head>
-
 
 <body>
     <div class="header">
@@ -35,13 +41,19 @@
         <p>Naam: __________________   Datum: ___________</p>
     </div>
 
-    {% for exercise, answer in exercises %}
-    <div class="exercise">
-        <p><strong>Opdracht {{ forloop.counter }}:</strong> {{ exercise }}</p>
-        <p>Antwoord: __________________________________</p>
+    {% for group in grouped_exercises %}
+    <div class="exercise-group">
+        <h2 class="group-heading">{{ group.heading }}</h2>
+        
+        {% for exercise, answer in group.exercises %}
+        <div class="exercise-item">
+            <p><strong>{{ forloop.counter }}.</strong> {{ exercise|safe }}</p>
+            <p>Antwoord: __________________________________</p>
+        </div>
+        {% endfor %}
     </div>
     
-    {% if forloop.counter|divisibleby:7 %}
+    {% if forloop.counter|divisibleby:2 and not forloop.last %}
     <div class="page-break"></div>
     {% endif %}
     {% endfor %}

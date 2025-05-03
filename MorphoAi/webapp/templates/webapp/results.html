@@ -47,6 +47,14 @@ body, .dropdown, .card-body {
     overflow: visible !important;
 }
 
+.group-heading {
+    font-weight: bold;
+    color: #333;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
 
 </style>
 <div class="container-fluid results-wrapper">
@@ -91,7 +99,7 @@ body, .dropdown, .card-body {
                 <div class="card-body">
                     <h4 class="card-title">Gegenereerde Oefeningen</h4>
                     <div id="exercises-results" class="list-group">
-                        {% include 'webapp/partials/added_exercises.html' %}
+                        {% include 'webapp/partials/added_exercises.html' with grouped_exercises=grouped_exercises %}
                     </div>
 
                     <!-- Add Exercises Form -->
@@ -121,6 +129,19 @@ body, .dropdown, .card-body {
                                 <div class="card-body bg-light">
                                     <form id="customExerciseForm">
                                         <div class="mb-3">
+                                            <label for="exerciseType" class="form-label">Exercise Type</label>
+                                            <select class="form-control" id="exerciseType">
+                                                <option value="custom">Custom Exercise</option>
+                                                <option value="identify">Identify Morphemes</option>
+                                                <option value="fill_in_the_blank">Fill in the Blank</option>
+                                                <option value="alternative_form">Alternative Form</option>
+                                                <option value="error_correction">Error Correction</option>
+                                                <option value="plural_form">Plural Form</option>
+                                                <option value="singular_form">Singular Form</option>
+                                            </select>
+                                            <small class="form-text text-muted">Select the type of exercise to group it appropriately.</small>
+                                        </div>
+                                        <div class="mb-3">
                                             <label for="exerciseText" class="form-label">Exercise Question</label>
                                             <textarea class="form-control" id="exerciseText" rows="3" placeholder="Enter your exercise question here..." required></textarea>
                                         </div>
@@ -148,66 +169,27 @@ body, .dropdown, .card-body {
 </div>
 
 
-<script>
-
-
-//   function handleOption(word, option) {
-//       if (option === 1) {
-//           sendToBackend(word, option);
-//       } else if (option === 2) {
-//           sendToBackend(word, option);
-//       } else if (option === 3) {
-//           sendToBackend(word, option);
-//       } else if (option === 4) {
-//           sendToBackend(word, option);
-//       }
-//       // } else if (option === 5) {
-//       //     sendToBackend(word, option);
-//       // }
-//   }
-
-  function sendToBackend(word, option) {
-      fetch("{% url 'generate_exercise_given_word' %}", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": '{{ csrf_token }}'
-          },
-          body: JSON.stringify({ word: word, exercise_type: option })
-      }).then(response => response.text())
-        .then(html => {
-            document.getElementById('exercises-results').innerHTML = html;
-        });
-
-  }
-  </script>
-  
-
-    <!-- Download options popup -->
-    <div class="modal fade" id="downloadModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
+<!-- Download options popup -->
+<div class="modal fade" id="downloadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Download Options</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Download Options</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-              <p>Select the version you want to download:</p>
-              <div class="d-grid gap-2">
-                <a href="{% url 'download_exercises' %}?version=student" class="btn btn-primary btn-lg">
-                  <i class="fas fa-user-graduate"></i> Student Version (Questions Only)
-                </a>
-                <a href="{% url 'download_exercises' %}?version=teacher" class="btn btn-success btn-lg">
-                  <i class="fas fa-chalkboard-teacher"></i> Teacher Version (With Answers)
-                </a>
-              </div>
+                <p>Select the version you want to download:</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'download_exercises' %}?version=student" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-graduate"></i> Student Version (Questions Only)
+                    </a>
+                    <a href="{% url 'download_exercises' %}?version=teacher" class="btn btn-success btn-lg">
+                        <i class="fas fa-chalkboard-teacher"></i> Teacher Version (With Answers)
+                    </a>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-  
-
-   
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -218,245 +200,317 @@ var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggl
 var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
   return new bootstrap.Tooltip(tooltipTriggerEl)
 })
-
 </script>
+
 <script>
-
-function titleEdit(){
-    // Get the current title text
-    var titleText = document.getElementById("title").innerHTML;
-    // Replace the title text with an input field
-    document.getElementById("title").outerHTML = `<input type="text" class="display-4 text-center m-5 form-control" style="font-size: 36px;" id="title-input" value="${titleText}">`;
-    // Change the button to save mode
-    document.getElementById("edit-title-button").style.display = "none";
-    document.getElementById("save-title-button").style.display = "inline-block";
-  }
-
-  function saveTitle() {
-    // Get the new title text from the input field
-    var newTitle = document.getElementById("title-input").value;
-    // Replace the input field with the new title text
-    document.getElementById("title-input").outerHTML = `<h1 class="display-4 text-center m-5" id="title">${newTitle}</h1>`;
-    // Change the button back to edit mode
-    document.getElementById("edit-title-button").style.display = "inline-block";
-    document.getElementById("save-title-button").style.display = "none";
-    // Send the new title to the backend
-    fetch("{% url 'update_title' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": '{{ csrf_token }}'
-      },
-      body: JSON.stringify({ title: newTitle })
-    }).then(res => {
-      if (!res.ok) {
-        alert("error when storing to session.");
-      }
-    });
+// Title editing functions
+function titleEdit() {
+  // Get the current title text
+  var titleText = document.getElementById("title").innerHTML;
+  // Replace the title text with an input field
+  document.getElementById("title").outerHTML = `<input type="text" class="display-4 text-center m-5 form-control" style="font-size: 36px;" id="title-input" value="${titleText}">`;
+  // Change the button to save mode
+  document.getElementById("edit-title-button").style.display = "none";
+  document.getElementById("save-title-button").style.display = "inline-block";
 }
 
-
-
-  function enableEdit(index) {
-    // Replace exercise text with input
-    const exerciseSpan = document.getElementById(`exercise-content-${index}`);
-    var exerciseText = exerciseSpan.innerHTML;
-    // replace <br> with new line
-    exerciseText = exerciseText.replace(/<br>/g, "\n");
-    exerciseSpan.outerHTML = `<textarea type="text" class="form-control d-inline w-75" id="exercise-input-${index}" >${exerciseText} </textarea>`;
-
-    // Replace answer text with input
-    const answerSpan = document.getElementById(`answer-content-${index}`);
-    var answerText = answerSpan.innerHTML;
-    // replace <br> with new line
-    answerText = answerText.replace(/<br>/g, "\n");
-    answerSpan.outerHTML = `<textarea type="text" class="form-control mt-2" id="answer-input-${index}" >${answerText}</textarea>`;
-
-    // Toggle buttons
-    document.getElementById(`edit-button-${index}`).style.display = "none";
-    document.getElementById(`save-button-${index}`).style.display = "inline-block";
-  }
-
-  function saveEdit(index) {
-    const exerciseInput = document.getElementById(`exercise-input-${index}`);
-    const answerInput = document.getElementById(`answer-input-${index}`);
-    var newExercise = exerciseInput.value;
-    var newAnswer = answerInput.value;
-    newExercise = newExercise.replace(/\n/g, "<br>"); 
-    newAnswer = newAnswer.replace(/\n/g, "<br>"); 
-
-    // Update UI
-    exerciseInput.outerHTML = `<span class="exercise-content" id="exercise-content-${index}">${newExercise}</span>`;
-    answerInput.outerHTML = `<span class="answer-content" id="answer-content-${index}">${newAnswer}</span>`;
-    document.getElementById(`edit-button-${index}`).style.display = "inline-block";
-    document.getElementById(`save-button-${index}`).style.display = "none";
-
-    // Send update to backend
-    fetch("{% url 'update_exercise' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": '{{ csrf_token }}'
-      },
-      body: JSON.stringify({
-        index: index - 1,  // zero-based index
-        exercise: newExercise,
-        answer: newAnswer
-      })
-    }).then(res => {
-      if (!res.ok) {
-        alert("error when storing to session.");
-      }
-    });
-  }
-
-  function deleteExercise(index) {
-    if (!confirm("Weet je zeker dat je deze oefening wilt verwijderen?")) {
-        return;
+function saveTitle() {
+  // Get the new title text from the input field
+  var newTitle = document.getElementById("title-input").value;
+  // Replace the input field with the new title text
+  document.getElementById("title-input").outerHTML = `<h1 class="display-4 text-center m-5" id="title">${newTitle}</h1>`;
+  // Change the button back to edit mode
+  document.getElementById("edit-title-button").style.display = "inline-block";
+  document.getElementById("save-title-button").style.display = "none";
+  // Send the new title to the backend
+  fetch("{% url 'update_title' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCsrfToken()
+    },
+    body: JSON.stringify({ title: newTitle })
+  }).then(res => {
+    if (!res.ok) {
+      showAlert("Error when updating title", "danger");
+    } else {
+      showAlert("Title updated successfully", "success");
     }
-
-    fetch("{% url 'delete_exercise' %}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
-        body: JSON.stringify({ index: index - 1 }) // zero-based
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Kon de oefening niet verwijderen.");
-        }
-        return response.text();
-    })
-    .then(html => {
-        document.getElementById('exercises-results').innerHTML = html;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert(error.message);
-    });
+  });
 }
 
-  function saveEditFromButton(button) {
-    const index = parseInt(button.getAttribute("data-index"));
-    saveEdit(index);
+// Exercise editing functions
+function enableEdit(typeIndex) {
+  // Parse the combined index (type-number)
+  const [type, index] = typeIndex.split('-');
+  
+  // Replace exercise text with input
+  const exerciseSpan = document.getElementById(`exercise-content-${type}-${index}`);
+  if (!exerciseSpan) {
+    console.error(`Exercise content element not found: exercise-content-${type}-${index}`);
+    return;
   }
-  function enableEditFromButton(button) {
-    const index = parseInt(button.getAttribute("data-index"));
-    enableEdit(index);
-  }
-  function deleteExerciseFromButton(button) {
-    const index = parseInt(button.getAttribute("data-index"));
-    deleteExercise(index);
-  }
-  const text = "{{text|escapejs}}";
+  
+  var exerciseText = exerciseSpan.innerHTML;
+  // replace <br> with new line
+  exerciseText = exerciseText.replace(/<br>/g, "\n");
+  exerciseSpan.outerHTML = `<textarea type="text" class="form-control d-inline w-75" id="exercise-input-${type}-${index}" >${exerciseText}</textarea>`;
 
-  // <!-- Add exercises -->
-  document.getElementById('generate-new-exercises-btn').addEventListener('click', function() {
+  // Replace answer text with input
+  const answerSpan = document.getElementById(`answer-content-${type}-${index}`);
+  if (!answerSpan) {
+    console.error(`Answer content element not found: answer-content-${type}-${index}`);
+    return;
+  }
+  
+  var answerText = answerSpan.innerHTML;
+  // replace <br> with new line
+  answerText = answerText.replace(/<br>/g, "\n");
+  answerSpan.outerHTML = `<textarea type="text" class="form-control mt-2" id="answer-input-${type}-${index}" >${answerText}</textarea>`;
+
+  // Toggle buttons
+  document.getElementById(`edit-button-${type}-${index}`).style.display = "none";
+  document.getElementById(`save-button-${type}-${index}`).style.display = "inline-block";
+}
+
+function saveEdit(typeIndex) {
+  // Parse the combined index (type-number)
+  const [type, index] = typeIndex.split('-');
+  
+  const exerciseInput = document.getElementById(`exercise-input-${type}-${index}`);
+  const answerInput = document.getElementById(`answer-input-${type}-${index}`);
+  
+  if (!exerciseInput || !answerInput) {
+    console.error(`Exercise or answer input element not found for ${type}-${index}`);
+    return;
+  }
+  
+  var newExercise = exerciseInput.value;
+  var newAnswer = answerInput.value;
+  newExercise = newExercise.replace(/\n/g, "<br>"); 
+  newAnswer = newAnswer.replace(/\n/g, "<br>"); 
+
+  // Update UI
+  exerciseInput.outerHTML = `<span class="exercise-content" id="exercise-content-${type}-${index}">${newExercise}</span>`;
+  answerInput.outerHTML = `<span class="answer-content" id="answer-content-${type}-${index}">${newAnswer}</span>`;
+  document.getElementById(`edit-button-${type}-${index}`).style.display = "inline-block";
+  document.getElementById(`save-button-${type}-${index}`).style.display = "none";
+
+  // Send update to backend
+  fetch("{% url 'update_exercise' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCsrfToken()
+    },
+    body: JSON.stringify({
+      type_index: typeIndex,
+      exercise: newExercise,
+      answer: newAnswer,
+      type: type
+    })
+  }).then(res => {
+    if (!res.ok) {
+      showAlert("Error when updating exercise", "danger");
+    } else {
+      showAlert("Exercise updated successfully", "success");
+    }
+  });
+}
+
+function deleteExercise(typeIndex) {
+  if (!confirm("Weet je zeker dat je deze oefening wilt verwijderen?")) {
+    return;
+  }
+
+  fetch("{% url 'delete_exercise' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCsrfToken()
+    },
+    body: JSON.stringify({ 
+      type_index: typeIndex
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error("Kon de oefening niet verwijderen.");
+    }
+    return response.text();
+  })
+  .then(html => {
+    document.getElementById('exercises-results').innerHTML = html;
+    showAlert("Exercise deleted successfully", "success");
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showAlert(error.message, "danger");
+  });
+}
+
+// Button handler functions
+function saveEditFromButton(button) {
+  const typeIndex = button.getAttribute("data-index");
+  saveEdit(typeIndex);
+}
+
+function enableEditFromButton(button) {
+  const typeIndex = button.getAttribute("data-index");
+  enableEdit(typeIndex);
+}
+
+function deleteExerciseFromButton(button) {
+  const typeIndex = button.getAttribute("data-index");
+  deleteExercise(typeIndex);
+}
+
+// Function for sending word to backend to generate exercise
+function sendToBackend(word, option) {
+  fetch("{% url 'generate_exercise_given_word' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCsrfToken()
+    },
+    body: JSON.stringify({ word: word, exercise_type: option })
+  }).then(response => {
+    if (!response.ok) {
+      throw new Error("Failed to generate exercise");
+    }
+    return response.text();
+  })
+  .then(html => {
+    document.getElementById('exercises-results').innerHTML = html;
+    showAlert(`Generated new exercise for "${word}"`, "success");
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showAlert(error.message, "danger");
+  });
+}
+
+// Utility functions
+function getCsrfToken() {
+  return document.querySelector('meta[name="csrf-token"]').content;
+}
+
+function showAlert(message, type) {
+  const alertContainer = document.createElement('div');
+  alertContainer.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+  alertContainer.role = 'alert';
+  alertContainer.innerHTML = `
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  `;
+  
+  const container = document.querySelector('.card-body');
+  container.insertBefore(alertContainer, document.getElementById('exercises-results'));
+  
+  // Auto dismiss after 5 seconds
+  setTimeout(() => {
+    alertContainer.classList.remove('show');
+    setTimeout(() => alertContainer.remove(), 150);
+  }, 5000);
+}
+
+// Document ready function
+document.addEventListener('DOMContentLoaded', function() {
+  // Add exercises button
+  const generateNewExercisesBtn = document.getElementById('generate-new-exercises-btn');
+  if (generateNewExercisesBtn) {
+    generateNewExercisesBtn.addEventListener('click', function() {
       const exercises = [];
       document.querySelectorAll('.exercise-input').forEach(input => {
-          exercises.push({
-              type: input.id,
-              count: input.value
-          });
+        exercises.push({
+          type: input.id,
+          count: input.value
+        });
       });
       
       fetch("{% url 'add_exercises' %}", {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest',  // Explicit header
-              'X-CSRFToken': '{{ csrf_token }}'
-          },
-          body: JSON.stringify({exercises: exercises, text: text})
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({exercises: exercises, text: "{{text|escapejs}}"})
       })
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('exercises-results').innerHTML = html;
-        })
-  });
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Failed to generate exercises");
+        }
+        return response.text();
+      })
+      .then(html => {
+        document.getElementById('exercises-results').innerHTML = html;
+        showAlert("New exercises added successfully", "success");
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showAlert(error.message, "danger");
+      });
+    });
+  }
 
   // Custom Exercise Form handling
-  document.addEventListener('DOMContentLoaded', function() {
-      const customExerciseForm = document.getElementById('customExerciseForm');
+  const customExerciseForm = document.getElementById('customExerciseForm');
+  if (customExerciseForm) {
+    customExerciseForm.addEventListener('submit', function(e) {
+      e.preventDefault();
       
-      if (customExerciseForm) {
-          customExerciseForm.addEventListener('submit', function(e) {
-              e.preventDefault();
-              
-              const exerciseText = document.getElementById('exerciseText').value;
-              const answerText = document.getElementById('answerText').value;
-              
-              if (!exerciseText.trim()) {
-                  alert('Exercise text cannot be empty');
-                  return;
-              }
-              
-              // Send the custom exercise to the backend
-              fetch('{% url "add_custom_exercise" %}', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'X-Requested-With': 'XMLHttpRequest',
-                      'X-CSRFToken': '{{ csrf_token }}'
-                  },
-                  body: JSON.stringify({
-                      exercise_text: exerciseText,
-                      answer_text: answerText
-                  })
-              })
-              .then(response => {
-                  if (!response.ok) {
-                      throw new Error('Network response was not ok');
-                  }
-                  return response.text();
-              })
-              .then(html => {
-                  // Replace the exercises display with the updated content
-                  document.getElementById('exercises-results').innerHTML = html;
-                  
-                  // Reset the form
-                  document.getElementById('exerciseText').value = '';
-                  document.getElementById('answerText').value = '';
-                  
-                  // Show success message
-                  showAlert('Custom exercise added successfully!', 'success');
-                  
-                  // Close the collapse
-                  var bsCollapse = new bootstrap.Collapse(document.getElementById('customExerciseCollapse'));
-                  bsCollapse.hide();
-              })
-              .catch(error => {
-                  console.error('Error:', error);
-                  showAlert('Failed to add custom exercise', 'danger');
-              });
-          });
+      const exerciseText = document.getElementById('exerciseText').value;
+      const answerText = document.getElementById('answerText').value;
+      const exerciseType = document.getElementById('exerciseType')?.value || 'custom';
+      
+      if (!exerciseText.trim()) {
+        showAlert('Exercise text cannot be empty', 'danger');
+        return;
       }
       
-      // Helper function to show alerts
-      function showAlert(message, type) {
-          const alertContainer = document.createElement('div');
-          alertContainer.className = `alert alert-${type} alert-dismissible fade show mt-3`;
-          alertContainer.role = 'alert';
-          alertContainer.innerHTML = `
-              ${message}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          `;
-          
-          const container = document.querySelector('.card-body');
-          container.insertBefore(alertContainer, document.getElementById('exercises-results'));
-          
-          // Auto dismiss after 5 seconds
-          setTimeout(() => {
-              alertContainer.classList.remove('show');
-              setTimeout(() => alertContainer.remove(), 150);
-          }, 5000);
-      }
-  });
+      // Send the custom exercise to the backend
+      fetch('{% url "add_custom_exercise" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+          exercise_text: exerciseText,
+          answer_text: answerText,
+          exercise_type: exerciseType
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.text();
+      })
+      .then(html => {
+        // Replace the exercises display with the updated content
+        document.getElementById('exercises-results').innerHTML = html;
+        
+        // Reset the form
+        document.getElementById('exerciseText').value = '';
+        document.getElementById('answerText').value = '';
+        
+        // Show success message
+        showAlert('Custom exercise added successfully!', 'success');
+        
+        // Close the collapse
+        var bsCollapse = new bootstrap.Collapse(document.getElementById('customExerciseCollapse'));
+        bsCollapse.hide();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showAlert('Failed to add custom exercise', 'danger');
+      });
+    });
+  }
+});
 </script>
-
-
-
 
 {% endblock %}

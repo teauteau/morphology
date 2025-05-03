@@ -68,7 +68,7 @@ def exercise_identify(dict_word):
     exercise_text = f"Identify the free and bound morphemes in the following word: {word}."
     answer_text = f"Free morphemes: {free}. <br>  Bound morphemes: {bound_string}"
     
-    return (exercise_text, answer_text)
+    return ("identify", exercise_text, answer_text)
 
 def exercise_fill_in_the_blank(dict_word):
     """
@@ -87,9 +87,10 @@ def exercise_fill_in_the_blank(dict_word):
     sentence = output['sentence']
     modified_word = output['word']
     sentence_blanked = re.sub(modified_word, '_____', sentence)
-    exercise_text = f"Fill in the blank in the following sentence: \n ({word}) {sentence_blanked}"
+    #exercise_text = f"Fill in the blank in the following sentence: \n ({word}) {sentence_blanked}"
+    exercise_text = f"({word}) {sentence_blanked}"
     answer_text = modified_word
-    return exercise_text, answer_text
+    return ("fill_in_the_blank", exercise_text, answer_text)
 
 def exercise_alternative_form(dict_word):
     """
@@ -132,7 +133,7 @@ def exercise_alternative_form(dict_word):
     else:
         answer_text = "Other answers could include plural forms, compound words, or verb forms."
 
-    return exercise_text, answer_text
+    return ("alternative_form", exercise_text, answer_text)
 
 def exercise_generate_affix_matching(morphemes, important_words, count):
     exercises = []
@@ -179,7 +180,8 @@ def exercise_generate_affix_matching(morphemes, important_words, count):
     random.shuffle(shuffled_rights)
 
     # Build the question
-    question = "Match morphemes on the left with the correct morphemes on the right:"
+    #question = "Match morphemes on the left with the correct morphemes on the right:"
+    question = ""
     rows = "".join(
         f"<tr><td>{i+1}. {left_parts[i]}</td><td>{chr(65+i)}. {shuffled_rights[i]}</td></tr>"
         for i in range(len(left_parts))
@@ -194,7 +196,7 @@ def exercise_generate_affix_matching(morphemes, important_words, count):
         answer_mapping.append(f" {i+1} - {label} ({words[i]}) <br>")
 
     answer = "\n".join(answer_mapping)
-    exercises.append((full_question, answer))
+    exercises.append(("affix_matching", full_question, answer))
 
     return exercises
 
@@ -218,7 +220,8 @@ def exercise_error_correction(dict_word):
         if '=' in correction:
             wrong_word, correct_word = map(str.strip, correction.split('='))
             sentence_blanked = re.sub(rf'\\b{re.escape(wrong_word)}\\b', '_', sentence)
-            exercise_text = f"Correct the error in the following sentence: \n {sentence_blanked}"
+            #exercise_text = f"Correct the error in the following sentence: \n {sentence_blanked}"
+            exercise_text = f"{sentence_blanked}"
             answer_text = f"{wrong_word} = {correct_word}"
         else:
             exercise_text = f"[Bad format for correction: '{correction}']"
@@ -228,7 +231,7 @@ def exercise_error_correction(dict_word):
         exercise_text = f"[Error parsing response for word '{word}']"
         answer_text = "Could not generate."
 
-    return exercise_text, answer_text
+    return ("error_correction", exercise_text, answer_text)
 
 def exercise_find_all(word_type, text):
     """
@@ -243,8 +246,9 @@ def exercise_find_all(word_type, text):
     output = json.loads(output)
     output = list(dict.fromkeys(output))
     exercise_text = f"Find all the {word_type} words in the given text."
+    exercise_text = f""
     answer_text = output
-    return exercise_text, answer_text
+    return ("find_all", exercise_text, answer_text)
 
 def exercise_plural_form(dict_word):
     """
@@ -266,46 +270,10 @@ def exercise_plural_form(dict_word):
     print(f"singular: {word}, plural form: {plural_form}")
     if plural_form == "PLURAL":
         return None, None
-        
-    #     # Basic validation - just make sure we got a non-empty result
-    #     if not plural_form or plural_form == word:
-    #         # If LLM returns the same word or empty string, try a different approach
-    #         backup_prompt = (
-    #             f"Create the plural form of the Dutch word '{word}' by applying "
-    #             f"standard Dutch pluralization rules (typically adding -en or -s). "
-    #             f"Return ONLY the pluralized word."
-    #         )
-    #         plural_form = generate_text(backup_prompt).strip()
-        
-    #     # Extra safety - if we still don't have a result, make a simple guess
-    #     if not plural_form or plural_form == word:
-    #         # Simple heuristic fallback
-    #         if word.endswith('e'):
-    #             plural_form = word + 'n'
-    #         elif word.endswith(('s', 'f', 'ch')):
-    #             plural_form = word + 'en'
-    #         else:
-    #             plural_form = word + 's'
-        
-    #     # Build the exercise and answer
-    #     exercise_text = f"Give the plural form of the word: {word}"
-    #     answer_text = plural_form
-        
-    #     return exercise_text, answer_text
-        
-    # except Exception as e:
-    #     print(f"Error in plural form exercise for '{word}': {e}")
-    #     # Fallback to a simple heuristic if everything else fails
-    #     if word.endswith('e'):
-    #         plural_form = word + 'n'
-    #     elif word.endswith(('s', 'f', 'ch')):
-    #         plural_form = word + 'en'
-    #     else:
-    #         plural_form = word + 's'
             
     exercise_text = f"Give the plural form of the word: {word}"
     answer_text = plural_form
-    return exercise_text, answer_text
+    return ("plural_form", exercise_text, answer_text)
         
 def exercise_singular_form(dict_word):
     """
@@ -350,7 +318,7 @@ def exercise_singular_form(dict_word):
         exercise_text = f"Give the singular form of the word: {word}"
         answer_text = singular_form
         
-        return exercise_text, answer_text
+        return ("singular_form", exercise_text, answer_text)
         
     except Exception as e:
         print(f"Error in singular form exercise for '{word}': {e}")
@@ -364,7 +332,7 @@ def exercise_singular_form(dict_word):
             
         exercise_text = f"Give the singular form of the word: {word}"
         answer_text = singular_form
-        return exercise_text, answer_text
+        return ("singular_form", exercise_text, answer_text)
 
 def find_specific_POS(pos_tag, dict_words):
     """
@@ -383,177 +351,182 @@ def find_specific_POS(pos_tag, dict_words):
 def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative_forms, nr_wrong, nr_affix, nr_find_compounds, nr_of_plural=0, nr_of_singular=0):
     """
     Generates exercises for the given text 
-    returns in format exercises = [(exercise_text, answer_text), ...]
+    returns in format exercises = [(exercise_type, exercise_text, answer_text), ...]
+    Handles cases where the number of exercises exceeds available words by reusing words
     """
+    # Calculate total words needed
     total_words_needed = nr_of_identify + nr_of_fill_in_blanks + nr_of_alternative_forms + nr_wrong + nr_find_compounds + nr_of_plural + nr_of_singular + 4
-    important_words = extract_important_words(text, total_words_needed)
+    
+    # Extract important words with a reasonable limit (avoid too large API calls)
+    max_words_to_extract = min(total_words_needed, 30)
+    important_words = extract_important_words(text, max_words_to_extract)
     morphemes = extract_morphemes(important_words)
+    
     exercises = []
     word_index = 0
     
     # Add identify exercises
-    for i in range(0, nr_of_identify):
-        exercise = exercise_identify(morphemes[i])
+    for i in range(nr_of_identify):
+        # Use modulo to wrap around if we exceed the available words
+        word_idx = i % len(morphemes)
+        exercise = exercise_identify(morphemes[word_idx])
         exercises.append(exercise)
-    word_index = nr_of_identify
+    word_index += nr_of_identify
 
     # Add fill in the blank exercises
     for i in range(nr_of_fill_in_blanks):
-        exercise = exercise_fill_in_the_blank(morphemes[i + word_index])
+        # Use modulo to wrap around if we exceed the available words
+        word_idx = (i + word_index) % len(morphemes)
+        exercise = exercise_fill_in_the_blank(morphemes[word_idx])
         exercises.append(exercise)
     word_index += nr_of_fill_in_blanks
 
-    ## Add alternative form exercises
+    # Add alternative form exercises
     for i in range(nr_of_alternative_forms):
-        exercise = exercise_alternative_form(morphemes[i + word_index])
-        exercises.append(exercise)
+        # Use modulo to wrap around if we exceed the available words
+        word_idx = (i + word_index) % len(morphemes)
+        exercise = exercise_alternative_form(morphemes[word_idx])
+        # Only add if we got a valid exercise back
+        if exercise:
+            exercises.append(exercise)
     word_index += nr_of_alternative_forms
 
-    ## Add error correction exercises
+    # Add error correction exercises
     for i in range(nr_wrong):
-        exercise = exercise_error_correction(morphemes[i + word_index])
+        # Use modulo to wrap around if we exceed the available words
+        word_idx = (i + word_index) % len(morphemes)
+        exercise = exercise_error_correction(morphemes[word_idx])
         exercises.append(exercise)
     word_index += nr_wrong
 
-    # add find all compounds exercises
+    # Add find all compounds exercises
     for i in range(nr_find_compounds):
         exercise = exercise_find_all("compound", text)
         exercises.append(exercise)
     word_index += nr_find_compounds
 
-    # add plural form exercises
-    nouns = find_specific_POS("NOUN", morphemes) # find all nouns in the important words
-    i = 0
-    count = 0
-    while count < nr_of_plural:
-        if i + word_index >= len(nouns):
-            print("ERROR: not enough nouns for plural form exercises")
-            break
-        exercise = exercise_plural_form(nouns[i + word_index])
-        if exercise != (None, None):
-            exercises.append(exercise)
-            count += 1  # only increase when successful
-        i += 1  # always move to the next noun
+    # Add plural form exercises
+    nouns = find_specific_POS("NOUN", morphemes)  # Find all nouns
+    if nouns:  # Only proceed if we have nouns
+        i = 0
+        count = 0
+        while count < nr_of_plural and i < len(nouns) * 2:  # Add a limit to prevent infinite loop
+            # Use modulo to wrap around nouns list
+            noun_idx = i % len(nouns)
+            exercise = exercise_plural_form(nouns[noun_idx])
+            if exercise != (None, None):
+                exercises.append(exercise)
+                count += 1
+            i += 1
     word_index += nr_of_plural
 
     # Add singular form exercises
     if nr_of_singular > 0:
-        singular_exercises = []
-        for i in range(min(nr_of_singular, len(morphemes) - word_index)):
-            # Try to find words with singular forms
-            for j in range(len(morphemes) - word_index):
-                idx = (i + j + word_index) % len(morphemes)
-                exercise = exercise_singular_form(morphemes[idx])
+        for i in range(nr_of_singular):
+            # Try a few words to find one that works
+            for attempt in range(min(len(morphemes), 5)):  # Limit attempts
+                word_idx = (i + word_index + attempt) % len(morphemes)
+                exercise = exercise_singular_form(morphemes[word_idx])
                 if exercise:  # If we found a valid exercise
-                    singular_exercises.append(exercise)
+                    exercises.append(exercise)
                     break
-        exercises.extend(singular_exercises)
-        word_index += nr_of_singular
-
-    # add affix matching exercises
-    if nr_affix > 0:
-        exercise = exercise_generate_affix_matching(morphemes, important_words, 4)
+    
+    # Add affix matching exercises
+    if nr_affix > 0 and len(morphemes) > 0:
+        exercise = exercise_generate_affix_matching(morphemes, important_words, min(4, len(morphemes)))
         exercises.extend(exercise)
-        print(exercise)
 
     return exercises, morphemes, important_words
-    
-
 
 def add_exercises(type, nr_of_exercises, morphemes, text, index=0):
     """
     Adds exercises to the list of exercises based on the type and number of exercises
+    Handles cases where the number of exercises exceeds available words by reusing words
     """
     index = int(index) + 1
     exercises = []
     
+    # Safety check - if no morphemes are available, return empty list
+    if not morphemes or len(morphemes) == 0:
+        print(f"Warning: No morphemes available for exercise type: {type}")
+        return exercises
+    
     if type == "identify":
         # Add identify exercises
         for i in range(nr_of_exercises):
-            # tries to use a not-used word, if not available, it starts at the beginning again 
-            j = (i + index - 1) % len(morphemes)
-            exercise = exercise_identify(morphemes[j])
+            # Use modulo to wrap around when index exceeds available words
+            word_idx = (i + index - 1) % len(morphemes)
+            exercise = exercise_identify(morphemes[word_idx])
             exercises.append(exercise)
             
     elif type == "fill_in_the_blank":
         # Add fill in the blank exercises
         for i in range(nr_of_exercises):
-            j = (i + index - 1) % len(morphemes)
-            exercise = exercise_fill_in_the_blank(morphemes[j])
+            word_idx = (i + index - 1) % len(morphemes)
+            exercise = exercise_fill_in_the_blank(morphemes[word_idx])
             exercises.append(exercise)
             
     elif type == "alternative":
         # Add alternative exercises
         for i in range(nr_of_exercises):
-            j = (i + index - 1) % len(morphemes)
-            exercise = exercise_alternative_form(morphemes[j])
-            exercises.append(exercise)
+            word_idx = (i + index - 1) % len(morphemes)
+            exercise = exercise_alternative_form(morphemes[word_idx])
+            if exercise:  # Only add valid exercises
+                exercises.append(exercise)
     
     elif type == "wrong_word_sentence":
         for i in range(nr_of_exercises):
-            j = (i + index - 1) % len(morphemes)
-            exercise = exercise_error_correction(morphemes[j])
+            word_idx = (i + index - 1) % len(morphemes)
+            exercise = exercise_error_correction(morphemes[word_idx])
             if exercise:  # Check if exercise is not None
                 exercises.append(exercise)
 
     elif type == "find_compounds":
         for i in range(nr_of_exercises):
-            j = (i + index - 1) % len(morphemes)
             exercise = exercise_find_all("compound", text)
             exercises.append(exercise)
     
     elif type == "plural_form":
-        nouns = find_specific_POS("NOUN", morphemes) # find all nouns in the important words
-        i = 0
-        count = 0
-        while count < nr_of_exercises:
-            j = (i + index - 1) % len(nouns)
-            if i >= len(nouns):
-                print("ERROR: not enough nouns for plural form exercises")
-                break
-            exercise = exercise_plural_form(nouns[j])
-            if exercise != (None, None):
-                exercises.append(exercise)
-                count += 1  # only increase when successful
-            i += 1  # always move to the next noun
-
-    # elif type == "plural_form":
-    #     # Add plural form exercises
-    #     for i in range(nr_of_exercises):
-    #         # Try words until we find one with a plural form or we've tried them all
-    #         valid_exercise = None
-    #         for attempt in range(len(morphemes)):
-    #             j = (i + index - 1 + attempt) % len(morphemes)
-    #             valid_exercise = exercise_plural_form(morphemes[j])
-    #             if valid_exercise:  # If we found a valid plural exercise
-    #                 exercises.append(valid_exercise)
-    #                 break
+        nouns = find_specific_POS("NOUN", morphemes)  # find all nouns
+        if nouns:  # Only proceed if we have nouns
+            i = 0
+            count = 0
+            # Loop with a maximum number of attempts to prevent infinite loop
+            max_attempts = len(nouns) * 2
+            while count < nr_of_exercises and i < max_attempts:
+                word_idx = i % len(nouns)  # Wrap around when needed
+                exercise = exercise_plural_form(nouns[word_idx])
+                if exercise != (None, None):
+                    exercises.append(exercise)
+                    count += 1
+                i += 1
+        else:
+            print("Warning: No nouns found for plural form exercises")
     
     elif type == "singular_form":
         # Add singular form exercises
-        for i in range(nr_of_exercises):
-            # Try words until we find one with a singular form or we've tried them all
-            valid_exercise = None
-            for attempt in range(len(morphemes)):
-                j = (i + index - 1 + attempt) % len(morphemes)
-                valid_exercise = exercise_singular_form(morphemes[j])
-                if valid_exercise:  # If we found a valid singular exercise
-                    exercises.append(valid_exercise)
-                    break
+        count = 0
+        i = 0
+        max_attempts = len(morphemes) * 2
+        while count < nr_of_exercises and i < max_attempts:
+            word_idx = (i + index - 1) % len(morphemes)
+            exercise = exercise_singular_form(morphemes[word_idx])
+            if exercise:  # If we found a valid exercise
+                exercises.append(exercise)
+                count += 1
+            i += 1
         
     elif type == "affix_matching":
         # For affix_matching, we generate a complete new exercise with nr_of_exercises items
         if nr_of_exercises > 0:
             important_words = [m.get('word', '') for m in morphemes if 'word' in m]
-            nr_of_words = 4 if len(morphemes) > 4 else len(morphemes)
+            nr_of_words = min(4, len(morphemes))  # Ensure we don't exceed available words
             matching_exercises = exercise_generate_affix_matching(morphemes, important_words, nr_of_words)
             exercises.extend(matching_exercises)
     else:
-        raise ValueError("Invalid exercise type.")
+        raise ValueError(f"Invalid exercise type: {type}")
     
     return exercises
-
-
 
 def generate_exercise_given_word(word, exercise_type):
     morphemes = extract_morphemes([word])
@@ -574,7 +547,7 @@ def generate_exercise_given_word(word, exercise_type):
             exercise = result
         else:
             # Fallback if the word doesn't have a plural form
-            exercise = ("This word doesn't have a meaningful plural form.", "N/A")
+            exercise = ("plural_form", "This word doesn't have a meaningful plural form.", "N/A")
     elif exercise_type == "singular_form":
         # For singular form
         result = exercise_singular_form(morphemes[0])
@@ -582,13 +555,7 @@ def generate_exercise_given_word(word, exercise_type):
             exercise = result
         else:
             # Fallback if the word isn't plural or doesn't have a singular form
-            exercise = ("This word isn't in plural form.", "N/A")
+            exercise = ("singular_form", "This word isn't in plural form.", "N/A")
     else:
         raise ValueError(f"Invalid exercise type. :{exercise_type}")
     return exercise
-    
-# example text 
-
-#text = "Hallo kinderen! Vandaag gaan we een spannende reis maken naar de wonderlijke wereld van bijen. Bijen zijn hele kleine, maar superbelangrijke beestjes voor onze natuur en zelfs voor ons eten!Wat zijn bijen?Bijen zijn insecten die heel goed zijn in bestuiven. Dat betekent dat ze stuifmeel van de ene bloem naar de andere brengen. Zo helpen ze planten om vruchten te maken, zoals appels en kersen. Er zijn heel veel verschillende soorten bijen, maar de meeste wonen samen in een bijenkorf.Hoe leven bijen?In een bijenkorf woont een grote bijenfamilie. Er is een koninginbij, werkbijen, en mannetjesbijen. De koningin is de enige die eitjes legt. De werkbijen doen bijna al het werk: ze verzamelen nectar, maken honing, poetsen de bijenkorf, en zorgen voor de babybijtjes. De mannetjesbijen helpen de koningin met het krijgen van nieuwe bijtjes."
-#generated = generate_exercises(text, 2, 2, 2)
-#print(generated)

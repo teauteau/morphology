@@ -4,14 +4,12 @@ from django.urls import reverse
 import json
 from .utils import generate_exercises, generate_exercise_given_word
 from .utils import add_exercises as utils_add_exercises
-from .utils import generate_exercise_given_word as  utils_generate_exercise_given_word
+from .utils import generate_exercise_given_word as utils_generate_exercise_given_word
 from django.utils.html import escape, mark_safe
 import re
 from .utils import generate_exercises, generate_exercise_given_word, exercise_plural_form, exercise_singular_form
 from .utils import add_exercises as utils_add_exercises
 from .utils import generate_exercise_given_word as utils_generate_exercise_given_word
-
-
 
 from django.views.decorators.csrf import csrf_exempt #REMOVE FOR PRODUCTION
 
@@ -46,6 +44,97 @@ exercise_examples = {"identify" : "Identificeer de morfemen in het woord 'onverg
 def home(request):
     return render(request, 'webapp/home.html')
 
+def group_exercises(exercises):
+    """
+    Groups exercises by their type and creates appropriate headings
+    """
+    # Dictionary of exercise types and their heading templates
+    heading_templates = {
+        "identify": "Identificeer de vrije en gebonden morfemen in de volgende woorden:",
+        "fill_in_the_blank": "Vul de juiste vorm in bij de volgende zinnen:",
+        "alternative_form": "Gebruik de vrije morfeem uit de onderstaande woorden om een andere vorm te schrijven die deze morfeem bevat:",
+        "error_correction": "Corrigeer de fouten in de volgende zinnen:",
+        "find_all": "Vind alle samenstellingen in de gegeven tekst:",
+        "plural_form": "Geef de meervoudsvorm van de volgende woorden:",
+        "singular_form": "Geef de enkelvoudsvorm van de volgende woorden:",
+        "affix_matching": "Match de voorvoegsels en achtervoegsels met de juiste woorden:",
+    }
+    
+    # Dictionary to hold grouped exercises
+    grouped = {}
+    
+    # Group exercises by type
+    for exercise in exercises:
+        # Handle both new (type, text, answer) and old (text, answer) formats
+        if len(exercise) == 3:
+            ex_type = exercise[0]
+            ex_content = exercise[1]
+            ex_answer = exercise[2]
+        else:
+            # Default type for backward compatibility
+            ex_type = "custom"
+            ex_content = exercise[0]
+            ex_answer = exercise[1]
+        
+        if ex_type not in grouped:
+            grouped[ex_type] = {
+                "heading": heading_templates.get(ex_type, f"Voltooi de volgende {ex_type} oefeningen:"),
+                "exercises": []
+            }
+        
+        # Format the exercise content based on the type
+        if ex_type == "identify":
+            # Extract just the word from "Identify the free and bound morphemes in the following word: {word}."
+            try:
+                word = ex_content.split("word: ")[1].strip(".")
+                formatted_content = word
+            except IndexError:
+                formatted_content = ex_content
+        elif ex_type == "fill_in_the_blank":
+            # Keep the full sentence for fill-in-the-blank
+            formatted_content = ex_content
+        elif ex_type == "alternative_form":
+            # Extract the morpheme and word
+            try:
+                parts = ex_content.split("Using the free morpheme '")[1].split("' from the word '")
+                morpheme = parts[0]
+                word = parts[1].split("',")[0]
+                formatted_content = f"'{morpheme}' from '{word}'"
+            except IndexError:
+                formatted_content = ex_content
+        elif ex_type == "plural_form":
+            # Extract just the word from "Give the plural form of the word: {word}"
+            try:
+                word = ex_content.split("word: ")[1]
+                formatted_content = word
+            except IndexError:
+                formatted_content = ex_content
+        elif ex_type == "singular_form":
+            # Extract just the word from "Give the singular form of the word: {word}"
+            try:
+                word = ex_content.split("word: ")[1]
+                formatted_content = word
+            except IndexError:
+                formatted_content = ex_content
+        elif ex_type == "error_correction":
+            # Keep the full sentence for error correction
+            formatted_content = ex_content
+        else:
+            # Default formatting for other types
+            formatted_content = ex_content
+        
+        grouped[ex_type]["exercises"].append((formatted_content, ex_answer))
+    
+    # Convert to list format for template rendering
+    result = []
+    for ex_type, data in grouped.items():
+        result.append({
+            "type": ex_type,
+            "heading": data["heading"],
+            "exercises": data["exercises"]
+        })
+    
+    return result
 
 #@csrf_exempt # REMOVE FOR PRODUCTION
 def generate(request):
@@ -99,7 +188,7 @@ def generate(request):
                 nr_of_affix += 0
                 nr_of_plural_form += 1
                 nr_of_singular_form += 1
-                nr_find_compounds += 1
+                nr_find_compounds += 0
 
             
             
@@ -159,19 +248,26 @@ def results_page(request):
     text = request.session.get("text", "Geen tekst ingevoerd")
     difficulty = request.session.get("difficulty", "Niet gespecificeerd")
     exercises = request.session.get("exercises", [])
-    exercise_types = request.session.get("exercise_types", [])
+    exercise_types_dict = request.session.get("exercise_types", [])
     important_words = request.session.get("important_words", [])
 
+    # Filter out "find_compounds" from exercise_types_dict
+    filtered_exercise_types = {k: v for k, v in exercise_types_dict.items() if k != "find_compounds"}
+    
+    # Group the exercises
+    grouped_exercises = group_exercises(exercises)
+    
     text_html = embolden(text, important_words)
 
     return render(request, "webapp/results.html", {
         "text_html": text_html,
         "text": text,
         "difficulty": difficulty,
-        "exercises": exercises,
-        "exercise_types": exercise_types,
+        "exercises": exercises,  # Keep the original for backward compatibility
+        "grouped_exercises": grouped_exercises,  # Add the grouped exercises
+        "exercise_types": filtered_exercise_types,  # Use the filtered dictionary
         "exercise_examples": exercise_examples,
-        "title" : title
+        "title": title
     })
 
 
@@ -204,12 +300,15 @@ def exercise_pdf(request):
     version = request.GET.get('version', 'student')  # Default to student version
     title = request.session.get('title', 'Opdrachten over Morfologie')
 
+    # Group the exercises
+    grouped_exercises = group_exercises(exercises)
+
     template = 'webapp/answers_pdf.html' if version == 'teacher' else 'webapp/exercise_pdf.html'
     filename = f"exercises_{version}.pdf"
 
     # Render template to HTML string
     html = render_to_string(template, {
-        'exercises': exercises,
+        'grouped_exercises': grouped_exercises,
         'title': title
     })
     
@@ -243,36 +342,33 @@ def add_exercises(request):
                 exercise_type = exercise.get('type', 'identify')
                 index = len(old_exercises) / len(exercise_types)
                 generated_exercises = utils_add_exercises(exercise_type, exercise_count, request.session.get("morphemes", [{'word': 'foutje', 'free': ['fout'], 'bound': {'prefixes': [], 'suffixes': ['je'], 'other': []}}]), text=text, index=index)
-                # print(generated_exercises)
                 new_exercises.extend(generated_exercises)
             combined_exercises = old_exercises + new_exercises
             request.session['exercises'] = combined_exercises
-            # # Process exercises here
-            return render(request, 'webapp/partials/added_exercises.html', {
-            'exercises': combined_exercises
-        })
-
-def generate_exercise_given_word(request):
-        if request.method == 'POST':
-            data = json.loads(request.body)
-            exercise_type = data.get('exercise_type')
-            word = data.get('word')
-            exercises = request.session.get('exercises', [])
-            exercise = utils_generate_exercise_given_word(word, exercise_type)
-            exercises.append(exercise)
-            request.session['exercises'] = exercises
-            # important_words = request.session.get("important_words", [])
-            # important_words = important_words.append(word)
-            # request.session["important_words"] = important_words
             
-
+            # Group the exercises for the template
+            grouped_exercises = group_exercises(combined_exercises)
+            
             return render(request, 'webapp/partials/added_exercises.html', {
-            'exercises': exercises
+                'grouped_exercises': grouped_exercises
             })
 
-
-
-
+def generate_exercise_given_word(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        exercise_type = data.get('exercise_type')
+        word = data.get('word')
+        exercises = request.session.get('exercises', [])
+        exercise = utils_generate_exercise_given_word(word, exercise_type)
+        exercises.append(exercise)
+        request.session['exercises'] = exercises
+        
+        # Group the exercises for the template
+        grouped_exercises = group_exercises(exercises)
+        
+        return render(request, 'webapp/partials/added_exercises.html', {
+            'grouped_exercises': grouped_exercises
+        })
 
 def update_exercise(request):
     if request.method == 'POST':
@@ -280,48 +376,137 @@ def update_exercise(request):
         index = data.get('index')
         new_exercise = data.get('exercise')
         new_answer = data.get('answer')
-
+        exercise_type = data.get('type', '')
+        type_index = data.get('type_index')
+        
         exercises = request.session.get('exercises', [])
-        if 0 <= index < len(exercises):
-            exercises[index][0] = new_exercise
-            exercises[index][1] = new_answer
-            request.session['exercises'] = exercises
-            return JsonResponse({'status': 'ok'})
-        else:
-            return JsonResponse({'status': 'invalid index'}, status=400)
+        
+        if type_index:
+            # Parse the type and index from the combined string (e.g., "identify-1")
+            try:
+                exercise_type, exercise_index = type_index.split('-')
+                exercise_index = int(exercise_index) - 1  # Convert to 0-based index
+                
+                # Find the matching exercise in the list
+                # Count exercises of the same type to find the right one
+                count = 0
+                for i, exercise in enumerate(exercises):
+                    # Handle both tuple formats: (type, text, answer) and (text, answer)
+                    current_type = exercise[0] if len(exercise) >= 3 else 'custom'
+                    
+                    if current_type == exercise_type:
+                        if count == exercise_index:
+                            # This is the one to update
+                            if len(exercises[i]) >= 3:
+                                exercises[i] = (current_type, new_exercise, new_answer)
+                            else:
+                                exercises[i] = (exercise_type, new_exercise, new_answer)
+                            
+                            request.session['exercises'] = exercises
+                            return JsonResponse({'status': 'ok'})
+                        count += 1
+                
+                return JsonResponse({'error': 'Exercise not found'}, status=404)
+                
+            except (ValueError, IndexError) as e:
+                return JsonResponse({'error': f'Invalid type_index format: {str(e)}'}, status=400)
+        
+        elif index is not None:
+            # Legacy support for direct index
+            index = int(index)
+            if 0 <= index < len(exercises):
+                # If we have the type in the exercise tuple, keep it
+                if len(exercises[index]) >= 3:
+                    exercises[index] = (exercises[index][0], new_exercise, new_answer)
+                else:
+                    # For backwards compatibility
+                    exercises[index] = (exercise_type, new_exercise, new_answer) if exercise_type else (new_exercise, new_answer)
+                
+                request.session['exercises'] = exercises
+                return JsonResponse({'status': 'ok'})
+            else:
+                return JsonResponse({'status': 'invalid index'}, status=400)
 
     return JsonResponse({'error': 'invalid request'}, status=405)
-
 
 def delete_exercise(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         index = data.get('index')
+        type_index = data.get('type_index')
+        
         exercises = request.session.get('exercises', [])
-        if 0 <= index < len(exercises):
-            del exercises[index]
-            request.session['exercises'] = exercises
-            return render(request, 'webapp/partials/added_exercises.html', {
-            'exercises': exercises
-            })
-        return JsonResponse({'error': 'invalid index'}, status=400)
+        
+        if type_index:
+            # Parse the type and index from the combined string (e.g., "identify-1")
+            try:
+                exercise_type, exercise_index = type_index.split('-')
+                exercise_index = int(exercise_index) - 1  # Convert to 0-based index
+                
+                # Find the matching exercise in the list
+                # Count exercises of the same type to find the right one
+                count = 0
+                for i, exercise in enumerate(exercises):
+                    # Handle both tuple formats: (type, text, answer) and (text, answer)
+                    current_type = exercise[0] if len(exercise) >= 3 else 'custom'
+                    
+                    if current_type == exercise_type:
+                        if count == exercise_index:
+                            # This is the one to delete
+                            del exercises[i]
+                            request.session['exercises'] = exercises
+                            
+                            # Group the exercises for the template
+                            grouped_exercises = group_exercises(exercises)
+                            
+                            return render(request, 'webapp/partials/added_exercises.html', {
+                                'grouped_exercises': grouped_exercises
+                            })
+                        count += 1
+                
+                return JsonResponse({'error': 'Exercise not found'}, status=404)
+                
+            except (ValueError, IndexError) as e:
+                return JsonResponse({'error': f'Invalid type_index format: {str(e)}'}, status=400)
+                
+        elif index is not None:
+            # Legacy support for direct index
+            index = int(index)
+            if 0 <= index < len(exercises):
+                del exercises[index]
+                request.session['exercises'] = exercises
+                
+                # Group the exercises for the template
+                grouped_exercises = group_exercises(exercises)
+                
+                return render(request, 'webapp/partials/added_exercises.html', {
+                    'grouped_exercises': grouped_exercises
+                })
+            return JsonResponse({'error': 'invalid index'}, status=400)
+            
+        return JsonResponse({'error': 'No index or type_index provided'}, status=400)
     return JsonResponse({'error': 'invalid method'}, status=405)
+
 
 def add_custom_exercise(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         exercise_text = data.get('exercise_text', '')
         answer_text = data.get('answer_text', '')
+        exercise_type = data.get('exercise_type', 'custom')  # Allow specifying a type for custom exercises
         
         if not exercise_text.strip():
             return JsonResponse({'error': 'Exercise text cannot be empty'}, status=400)
             
         exercises = request.session.get('exercises', [])
-        exercises.append((exercise_text, answer_text))
+        exercises.append((exercise_type, exercise_text, answer_text))
         request.session['exercises'] = exercises
         
+        # Group the exercises for the template
+        grouped_exercises = group_exercises(exercises)
+        
         return render(request, 'webapp/partials/added_exercises.html', {
-            'exercises': exercises
+            'grouped_exercises': grouped_exercises
         })
         
     return JsonResponse({'error': 'Invalid request'}, status=405)

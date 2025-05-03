@@ -1,56 +1,83 @@
-{% if exercises %}
-{% for exercise, answer in exercises %}
-<div class="list-group-item">
-  <!-- Exercise text -->
-  <p class="mb-2">
-    <strong>Oefening {{ forloop.counter }}:</strong>
-    <div class="exercise-content" id="exercise-content-{{ forloop.counter }}">{{ exercise|safe|linebreaksbr }}</div>
-  </p>
-
-
-
-  <!-- Toggle answer -->
-  <button class="btn btn-outline-success btn-sm mb-2" type="button" data-bs-toggle="collapse"
-    data-bs-target="#answer{{ forloop.counter }}" aria-expanded="false" aria-controls="answer{{ forloop.counter }}">
-    Toon Antwoord
-  </button>
-
-  <!-- Edit/Save buttons -->
-  <button class="btn btn-outline-primary btn-sm mb-2" type="button" data-index="{{ forloop.counter }}"
-    onclick="enableEditFromButton(this)" id="edit-button-{{ forloop.counter }}">
-    <!-- edit pen icon-->
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen"
-      viewBox="0 0 16 16">
-      <path
-        d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
-    </svg>
-  </button>
-
-  <button class="btn btn-primary btn-sm mb-2" type="button" data-index="{{ forloop.counter }}"
-    onclick="saveEditFromButton(this)" id="save-button-{{ forloop.counter }}" style="display: none;">
-    Opslaan
-  </button>
-  <!-- Delete button-->
-  <button class="btn btn-outline-danger btn-sm mb-2" type="button" data-index="{{ forloop.counter }}"
-    onclick="deleteExerciseFromButton(this)">
-    <!-- trash can icon-->
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash"
-      viewBox="0 0 16 16">
-      <path
-        d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
-      <path
-        d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
-    </svg>
-
-  </button>
-
-  <!-- Answer collapsible -->
-  <div class="collapse mt-2" id="answer{{ forloop.counter }}">
-    <p class="text-success border rounded p-2 bg-light">
-      <strong>Antwoord:</strong>
-      <span class="answer-content" id="answer-content-{{ forloop.counter }}">{{ answer|safe }}</span>
+{% if grouped_exercises %}
+{% for group in grouped_exercises %}
+<div class="exercise-group mb-4">
+  <h3 class="group-heading">{{ group.heading }}</h3>
+  {% for exercise, answer in group.exercises %}
+  <div class="list-group-item">
+    <!-- Exercise text -->
+    <p class="mb-2">
+      <strong>{{ forloop.counter }}:</strong>
+      {% if group.type == "affix_matching" %}
+        <div class="exercise-content" id="exercise-content-{{ group.type }}-{{ forloop.counter }}">{{ exercise|safe|linebreaksbr }}</div>
+      {% else %}
+        <span class="exercise-content" id="exercise-content-{{ group.type }}-{{ forloop.counter }}">{{ exercise|safe|linebreaksbr }}</span>
+      {% endif %}
     </p>
+
+    <!-- Toggle answer -->
+    <button class="btn btn-outline-success btn-sm mb-2" type="button" data-bs-toggle="collapse"
+      data-bs-target="#answer-{{ group.type }}-{{ forloop.counter }}" aria-expanded="false" 
+      aria-controls="answer-{{ group.type }}-{{ forloop.counter }}">
+      Toon Antwoord
+    </button>
+
+    <!-- Edit/Save buttons -->
+    <button class="btn btn-outline-primary btn-sm mb-2" type="button" data-index="{{ group.type }}-{{ forloop.counter }}"
+      onclick="enableEditFromButton(this)" id="edit-button-{{ group.type }}-{{ forloop.counter }}">
+      <!-- edit pen icon-->
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen"
+        viewBox="0 0 16 16">
+        <path
+          d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+      </svg>
+    </button>
+
+    <button class="btn btn-primary btn-sm mb-2" type="button" data-index="{{ group.type }}-{{ forloop.counter }}"
+      onclick="saveEditFromButton(this)" id="save-button-{{ group.type }}-{{ forloop.counter }}" style="display: none;">
+      Opslaan
+    </button>
+    
+    <!-- Delete button-->
+    <button class="btn btn-outline-danger btn-sm mb-2" type="button" data-index="{{ group.type }}-{{ forloop.counter }}"
+      onclick="deleteExerciseFromButton(this)">
+      <!-- trash can icon-->
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash"
+        viewBox="0 0 16 16">
+        <path
+          d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+        <path
+          d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+      </svg>
+    </button>
+
+    <!-- Answer collapsible -->
+    <div class="collapse mt-2" id="answer-{{ group.type }}-{{ forloop.counter }}">
+      <p class="text-success border rounded p-2 bg-light">
+        <strong>Antwoord:</strong>
+        <span class="answer-content" id="answer-content-{{ group.type }}-{{ forloop.counter }}">{{ answer|safe }}</span>
+      </p>
+    </div>
   </div>
+  {% endfor %}
 </div>
 {% endfor %}
+{% else %}
+<p class="text-muted">Geen oefeningen beschikbaar. Genereer nieuwe oefeningen of voeg handmatig toe.</p>
 {% endif %}
+
+<style>
+  /* Special styling for affix matching tables */
+  .exercise-content table {
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+    border-collapse: separate;
+    border-spacing: 20px 0;
+  }
+  
+  .exercise-content table td {
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: middle;
+  }
+</style>
