@@ -1,7 +1,7 @@
 {% if grouped_exercises %}
 {% for group in grouped_exercises %}
 <div class="exercise-group mb-4">
-  <h3 class="group-heading">{{ group.heading }}</h3>
+  <p class="group-heading">{{ group.heading }}</p>
   {% for exercise, answer in group.exercises %}
   <div class="list-group-item">
     <!-- Exercise text -->

@@ -1,12 +1,12 @@
 from google import genai
-from .keys import gemini_API_KEY
+from .keys import gemini_API_key
 import json
 import re
 import random
 import spacy
 
 
-client = genai.Client(api_key='gemini_API_KEY')
+client = genai.Client(api_key=gemini_API_key)
 model = "gemini-2.0-flash"
 
 def generate_text(prompt):
