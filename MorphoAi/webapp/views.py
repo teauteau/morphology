@@ -19,14 +19,17 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 
-exercise_types = {"identify": "Identificeer morfemen",
-                   "fill_in_the_blank": "Invullen",
-                   "alternative": "Alternatieve vorm",
-                   "wrong_word_sentence": "Fout woord in zin",
-                   "affix_matching": "Achtervoegsels matchen",
-                   "find_compounds": "Vind alle samenstellingen",
-                   "plural_form": "Meervoudsvorm",
-                   "singular_form": "Enkelvoudsvorm"}
+exercise_types = {"identify": "Identificeer morfemen", #hard
+                   "fill_in_the_blank": "Invullen", #?
+                   "alternative": "Alternatieve vorm", #hard
+                   "wrong_word_sentence": "Fout woord in zin", #medium
+                   "affix_matching": "Achtervoegsels matchen", # medium?
+                   "find_compounds": "Vind alle samenstellingen", #easy
+                   "find_plurals": "Vind alle meervoudsvormen", #easy
+                   "find_diminutives": "Vind alle verkleinwoorden", #easy
+                   "plural_form": "Meervoudsvorm", # medium
+                   "singular_form": "Enkelvoudsvorm" # medium
+                   } 
 
 # these exercise types are not used in the dropdown menu (use this for exercises that do not depend on a single word)
 exercise_types_ignore = ["affix_matching", "find_compounds"]
@@ -38,6 +41,8 @@ exercise_examples = {"identify" : "Identificeer de morfemen in het woord 'onverg
                       "wrong_word_sentence" : "De hond is een 'onvergetelijke' huisdier.",
                       "affix_matching" : "Koppel de juiste achtervoegsels aan de woorden.",
                       "find_compounds" : "Vind alle samenstellingen in de tekst.",
+                      "find_plurals" : "Vind alle meervoudsvormen in de tekst.",
+                      "find_diminutives" : "Vind alle verkleinwoorden in de tekst.",
                       "plural_form" : "Wat is de meervoudsvorm van 'boek'?",
                       "singular_form" : "Wat is de enkelvoudsvorm van 'boeken'?"}
 
@@ -55,10 +60,14 @@ def group_exercises(exercises):
         "fill_in_the_blank": "Vul de juiste vorm in bij de volgende zinnen:",
         "alternative_form": "Gebruik de vrije morfeem uit de onderstaande woorden om een andere vorm te schrijven die deze morfeem bevat:",
         "error_correction": "Corrigeer de fouten in de volgende zinnen:",
-        "find_all": "Vind alle samenstellingen in de gegeven tekst.",
+        "find_compound": "Vind alle samenstellingen in de gegeven tekst.",
+        "find_plural": "Vind alle meervoudsvormen in de gegeven tekst.",
+        "find_diminutive": "Vind alle verkleinwoorden in de gegeven tekst.",
         "plural_form": "Geef de meervoudsvorm van de volgende woorden:",
         "singular_form": "Geef de enkelvoudsvorm van de volgende woorden:",
         "affix_matching": "Match de voorvoegsels en achtervoegsels met de juiste woorden:",
+        "easy_extra": "Beantwoord de volgende vragen:",
+
     }
     
     # Dictionary to hold grouped exercises
@@ -155,11 +164,14 @@ def generate(request):
             nr_of_wrong_words = 0
             nr_of_affix = 0
             nr_find_compounds = 0
+            nr_find_plurals = 0
+            nr_find_diminutives = 0
             nr_of_plural_form = 0  
             nr_of_singular_form = 0 
+            easy_extra = False
             
             if "easy_extra" in difficulty:
-                nr_of_identify += 1
+                easy_extra = True
 
             if "easy" in difficulty:
                 nr_of_identify += 0
@@ -170,6 +182,9 @@ def generate(request):
                 nr_of_plural_form += 2  
                 nr_of_singular_form += 0
                 nr_find_compounds += 0
+                nr_find_plurals = 1
+                nr_find_diminutives = 1
+
 
             if "medium" in difficulty:
                 nr_of_identify += 0
@@ -180,6 +195,9 @@ def generate(request):
                 nr_find_compounds += 2
                 nr_of_plural_form += 2
                 nr_of_singular_form += 1
+                nr_find_plurals = 0
+                nr_find_diminutives = 0
+
 
             if "hard" in difficulty:
                 nr_of_identify += 0
@@ -190,20 +208,27 @@ def generate(request):
                 nr_of_plural_form += 2
                 nr_of_singular_form += 2
                 nr_find_compounds += 2
+                nr_find_plurals = 0
+                nr_find_diminutives = 0
+
 
             
             
             # Generate exercises with the new parameters
             exercises, morphemes, important_words = generate_exercises(
                 text, 
+                easy_extra,
                 nr_of_identify, 
                 nr_of_fill_in_blanks, 
                 nr_of_alternative, 
                 nr_of_wrong_words, 
                 nr_of_affix, 
                 nr_find_compounds,
+                nr_find_plurals,
+                nr_find_diminutives,
                 nr_of_plural_form,  
                 nr_of_singular_form  
+
             )            
             
             # Store in session
@@ -350,7 +375,7 @@ def add_exercises(request):
             
             # Group the exercises for the template
             grouped_exercises = group_exercises(combined_exercises)
-            
+
             return render(request, 'webapp/partials/added_exercises.html', {
                 'grouped_exercises': grouped_exercises
             })

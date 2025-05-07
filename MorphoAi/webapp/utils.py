@@ -254,9 +254,9 @@ def exercise_find_all(word_type, text):
     Generates a find all {word_type} exercise for the given text
     expects:
       the full text as text
-      word type from [compound, TODO more types]
+      word type from [compound, plural, diminutive]
     """
-    prompt = f"Find all {word_type} words in the following Dutch text. Return your answer formatted as a JSON list. Do not include any markdown formatting like triple backticks in your answer. The text: {text}"	
+    prompt = f"Find all {word_type} words in the following Dutch text. If there are none, return 'None'. Return your answer formatted as a JSON list. Do not include any markdown formatting like triple backticks in your answer. The text: {text}"	
     output_json = generate_text(prompt)
     output = remove_markdown(output_json)
     output = json.loads(output)
@@ -264,7 +264,7 @@ def exercise_find_all(word_type, text):
     exercise_text = f"Find all the {word_type} words in the given text."
     exercise_text = f""
     answer_text = output
-    return ("find_all", exercise_text, answer_text)
+    return ("find_"+word_type, exercise_text, answer_text)
 
 def exercise_plural_form(dict_word):
     """
@@ -364,14 +364,33 @@ def find_specific_POS(pos_tag, dict_words):
                 list.append(word)
     return list
 
-def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative_forms, nr_wrong, nr_affix, nr_find_compounds, nr_of_plural=0, nr_of_singular=0):
+def easy_extra_exercises(nr_of_exercises):
+    q1 = "Geef drie voorbeelden van een gebonden morfeem"
+    a1 = "Mogelijke voorbeelden zijn: -en, -s, -tje"
+    q2 = "Geef drie voorbeelden van een vrij morfeem"
+    a2 = "Voorbeelden zijn: huis, boom, auto, rood"
+    q3 = "Leg uit wat een samenstelling is"
+    a3 = "Een samenstelling is een woord dat bestaat uit twee of meer vrije morfemen die samen een nieuwe betekenis vormen. Bijvoorbeeld: 'tafelblad' is een samenstelling van 'tafel' en 'blad'."
+    q4 = "Leg uit wat een afleiding is"
+    a4 = "Een afleiding is een nieuw woord dat ontstaat door een voor- of achtervoegsel toe te voegen aan een bestaand woord, waardoor de betekenis van het verandert. Bijvoorbeeld: 'vaar' wordt 'gevaar' door het achtervoegsel 'ge-' toe te voegen."
+    q5 = "Leg uit wat een verbuiging is"
+    a5 = "Een verbuiging is een woord dat bestaat uit een of meerdere vrije en gebonden morfemen, maar hierbij ontstaat geen nieuwe betekenis. Het woord wordt aangepast zodat het past in de grammaticale context, zoals getal of geslacht. Bijvoorbeeld: 'klein' wordt 'kleiner' of 'hond' wordt 'honden'."
+    q6 = "Welke soorten verbuigingen zijn er?"
+    a6 = "Er zijn verschillende soorten verbuigingen, zowaaronder: meervoud (bijvoorbeeld 'kat' wordt 'katten'), vergelijkingen (bijvoorbeeld 'klein' wordt 'kleiner'), buiging -s (bijvoorbeeld 'rood' wordt 'roods'), buiging -e (bijvoorbeeld 'mooi' wordt 'mooie') en verkleinwoorden (bijvoorbeeld 'huis' wordt 'huisje')."
+    q7 = "Leg uit wat een vervoeging is"
+    a7 = "Een vervoeging is een verandering van een werkwoord om het aan te passen aan de tijd, persoon of getal. Bijvoorbeeld: 'werk' wordt 'werkte' in de verleden tijd."
+    exercises = [("easy_extra", q1, a1), ("easy_extra", q2, a2), ("easy_extra", q3, a3), ("easy_extra", q4, a4), ("easy_extra", q5, a5), ("easy_extra", q6, a6), ("easy_extra", q7, a7)]
+    chosen_exercises = random.sample(exercises, min(nr_of_exercises, len(exercises)))
+    return chosen_exercises
+
+def generate_exercises(text, easy_extra, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative_forms, nr_wrong, nr_affix, nr_find_compounds, nr_find_plural, nr_find_diminutive, nr_of_plural=0, nr_of_singular=0):
     """
     Generates exercises for the given text 
     returns in format exercises = [(exercise_type, exercise_text, answer_text), ...]
     Handles cases where the number of exercises exceeds available words by reusing words
     """
     # Calculate total words needed
-    total_words_needed = nr_of_identify + nr_of_fill_in_blanks + nr_of_alternative_forms + nr_wrong + nr_find_compounds + nr_of_plural + nr_of_singular + 4
+    total_words_needed = nr_of_identify + nr_of_fill_in_blanks + nr_of_alternative_forms + nr_wrong + nr_find_compounds + nr_find_plural + nr_find_diminutive + nr_of_plural + nr_of_singular + 4
     
     # Extract important words with a reasonable limit (avoid too large API calls)
     max_words_to_extract = min(total_words_needed, 30)
@@ -381,6 +400,11 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alterna
     exercises = []
     word_index = 0
     
+    # add easy_extra exercises
+    if easy_extra:
+        easy_exercises = easy_extra_exercises(5)
+        exercises.extend(easy_exercises)
+
     # Add identify exercises
     for i in range(nr_of_identify):
         # Use modulo to wrap around if we exceed the available words
@@ -420,6 +444,20 @@ def generate_exercises(text, nr_of_identify, nr_of_fill_in_blanks, nr_of_alterna
         exercise = exercise_find_all("compound", text)
         exercises.append(exercise)
     word_index += nr_find_compounds
+    
+    # Add find all plural exercises
+    for i in range(nr_find_plural):
+        exercise = exercise_find_all("plural", text)
+        exercises.append(exercise)
+    word_index += nr_find_plural
+    
+    # Add find all plural exercises
+    for i in range(nr_find_diminutive):
+        exercise = exercise_find_all("diminutive", text)
+        exercises.append(exercise)
+    word_index += nr_find_diminutive 
+    
+    
 
     # Add plural form exercises
     nouns = find_specific_POS("NOUN", morphemes)  # Find all nouns
@@ -500,6 +538,16 @@ def add_exercises(type, nr_of_exercises, morphemes, text, index=0):
     elif type == "find_compounds":
         for i in range(nr_of_exercises):
             exercise = exercise_find_all("compound", text)
+            exercises.append(exercise)
+            
+    elif type == "find_plurals":
+        for i in range(nr_of_exercises):
+            exercise = exercise_find_all("plural", text)
+            exercises.append(exercise)
+            
+    elif type == "find_diminutives":
+        for i in range(nr_of_exercises):
+            exercise = exercise_find_all("diminutive", text)
             exercises.append(exercise)
     
     elif type == "plural_form":
