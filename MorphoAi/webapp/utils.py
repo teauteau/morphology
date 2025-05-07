@@ -28,9 +28,25 @@ def extract_important_words(text, nr_of_words):
     prompt = f"Extract the {nr_of_words} most important Dutch words from the following Dutch text. Do not add any named entities. The words will be used to make exercises about morphology, so mainly choose words that consist of multiple morphemes. Give it as an JSON array named 'words' Do not add the json markdown formatting, just plain text. Text:  {text}"
     important_words_string = generate_text(prompt)
     important_words_string = remove_markdown(important_words_string)
+    important_words_string = normalize_important_words(important_words_string)
     words = json.loads(important_words_string)['words']
     return words
 
+
+# Makes sure if the important words are in the correct format (list of strings or dict with 'words' key)
+def normalize_important_words(important_words_string):
+    try:
+        data = json.loads(important_words_string)
+        if isinstance(data, dict) and 'words' in data:
+            return json.dumps(data)
+        elif isinstance(data, list):
+            return json.dumps({'words': data})
+        else:
+            raise ValueError("Invalid format: expected a dict with 'words' key or a list of words.")
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON: {e}")
+    
+    
 def extract_morphemes(words):
     prompt = f"Identify the morphemes in the following Dutch words and structure the result as a JSON object. The JSON should contain a 'words' list, where each word is represented as an object with three keys: 'word' (containing the word), 'free' (for free morphemes) and 'bound' (for bound morphemes). The 'bound' morphemes should be further categorized into 'prefixes', 'suffixes', and 'other'. DO NOT include markdown JSON formatting syntax like triple backticks in your answer. Only return the JSON structure as plain text. Words:\n{words}"
     morphemes_string = generate_text(prompt)

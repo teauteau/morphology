@@ -10,6 +10,7 @@ import re
 from .utils import generate_exercises, generate_exercise_given_word, exercise_plural_form, exercise_singular_form
 from .utils import add_exercises as utils_add_exercises
 from .utils import generate_exercise_given_word as utils_generate_exercise_given_word
+import traceback
 
 from django.views.decorators.csrf import csrf_exempt #REMOVE FOR PRODUCTION
 
@@ -54,7 +55,7 @@ def group_exercises(exercises):
         "fill_in_the_blank": "Vul de juiste vorm in bij de volgende zinnen:",
         "alternative_form": "Gebruik de vrije morfeem uit de onderstaande woorden om een andere vorm te schrijven die deze morfeem bevat:",
         "error_correction": "Corrigeer de fouten in de volgende zinnen:",
-        "find_all": "Vind alle samenstellingen in de gegeven tekst:",
+        "find_all": "Vind alle samenstellingen in de gegeven tekst.",
         "plural_form": "Geef de meervoudsvorm van de volgende woorden:",
         "singular_form": "Geef de enkelvoudsvorm van de volgende woorden:",
         "affix_matching": "Match de voorvoegsels en achtervoegsels met de juiste woorden:",
@@ -162,11 +163,11 @@ def generate(request):
 
             if "easy" in difficulty:
                 nr_of_identify += 0
-                nr_of_fill_in_blanks += 1
-                nr_of_alternative += 1
-                nr_of_wrong_words += 0
-                nr_of_affix += 0
-                nr_of_plural_form += 0  
+                nr_of_fill_in_blanks += 2
+                nr_of_alternative += 2
+                nr_of_wrong_words += 2
+                nr_of_affix += 2
+                nr_of_plural_form += 2  
                 nr_of_singular_form += 0
                 nr_find_compounds += 0
 
@@ -174,10 +175,10 @@ def generate(request):
                 nr_of_identify += 0
                 nr_of_fill_in_blanks += 0
                 nr_of_alternative += 0
-                nr_of_wrong_words += 1
-                nr_of_affix += 1
-                nr_find_compounds += 1
-                nr_of_plural_form += 1
+                nr_of_wrong_words += 2
+                nr_of_affix += 2
+                nr_find_compounds += 2
+                nr_of_plural_form += 2
                 nr_of_singular_form += 1
 
             if "hard" in difficulty:
@@ -185,10 +186,10 @@ def generate(request):
                 nr_of_fill_in_blanks += 0
                 nr_of_alternative += 0
                 nr_of_wrong_words += 0
-                nr_of_affix += 0
-                nr_of_plural_form += 1
-                nr_of_singular_form += 1
-                nr_find_compounds += 0
+                nr_of_affix += 2
+                nr_of_plural_form += 2
+                nr_of_singular_form += 2
+                nr_find_compounds += 2
 
             
             
@@ -220,6 +221,7 @@ def generate(request):
 
         except Exception as e:
             print(f"Error: {e}")
+            print(traceback.format_exc())  # Print the full traceback for debugging
             return JsonResponse({"error": str(e)}, status=500)
 
     return render(request, 'webapp/generate.html')
