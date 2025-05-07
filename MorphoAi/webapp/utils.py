@@ -326,12 +326,19 @@ def find_specific_POS(pos_tag, dict_words):
     """
     nlp = spacy.load("nl_core_news_sm")
     list = []
+    singulars = []
+    plurals = []
     for word in dict_words:
         doc = nlp(word['word'])
         for token in doc:
+            number = token.morph.get("Number")[0] if token.morph.get("Number") else "Unknown"
             if token.pos_ == pos_tag:
                 list.append(word)
-    return list
+                if number == "Plur":
+                    plurals.append(word)
+                if number == "Sing":
+                    singulars.append(word)
+    return list, singulars, plurals
 
 def easy_extra_exercises(nr_of_exercises):
     q1 = "Geef drie voorbeelden van een gebonden morfeem"
@@ -427,16 +434,16 @@ def generate_exercises(text, easy_extra, nr_of_identify, nr_of_fill_in_blanks, n
     word_index += nr_find_diminutive 
     
     
-
+    noun_idx = 0
     # Add plural form exercises
-    nouns = find_specific_POS("NOUN", morphemes)  # Find all nouns
-    if nouns:  # Only proceed if we have nouns
+    nouns, singulars, plurals = find_specific_POS("NOUN", morphemes)  # Find all nouns
+    if singulars:  # Only proceed if we have nouns
         i = 0
         count = 0
-        while count < nr_of_plural and i < len(nouns) * 2:  # Add a limit to prevent infinite loop
+        while count < nr_of_plural and i < len(singulars) * 2:  # Add a limit to prevent infinite loop
             # Use modulo to wrap around nouns list
-            noun_idx = i % len(nouns)
-            exercise = exercise_plural_form(nouns[noun_idx])
+            noun_idx = i % len(singulars)
+            exercise = exercise_plural_form(singulars[noun_idx])
             if exercise != (None, None):
                 exercises.append(exercise)
                 count += 1
@@ -444,13 +451,13 @@ def generate_exercises(text, easy_extra, nr_of_identify, nr_of_fill_in_blanks, n
     word_index += nr_of_plural
 
     # Add singular form exercises
-    if nouns:  # Only proceed if we have nouns
-        i = 0
+    if plurals:  # Only proceed if we have nouns
+        i = noun_idx + 1
         count = 0
-        while count < nr_of_singular and i < len(nouns) * 2:  # Add a limit to prevent infinite loop
+        while count < nr_of_singular and i < len(plurals) * 2:  # Add a limit to prevent infinite loop
             # Use modulo to wrap around nouns list
-            noun_idx = i % len(nouns)
-            exercise = exercise_singular_form(nouns[noun_idx])
+            noun_idx = i % len(plurals)
+            exercise = exercise_singular_form(plurals[noun_idx])
             if exercise != (None, None):
                 exercises.append(exercise)
                 count += 1
@@ -471,7 +478,8 @@ def add_exercises(type, nr_of_exercises, morphemes, text, index=0):
     """
     index = int(index) + 1
     exercises = []
-    
+    nouns, singulars, plurals = find_specific_POS("NOUN", morphemes)  # find all nouns
+
     # Safety check - if no morphemes are available, return empty list
     if not morphemes or len(morphemes) == 0:
         print(f"Warning: No morphemes available for exercise type: {type}")
@@ -521,9 +529,7 @@ def add_exercises(type, nr_of_exercises, morphemes, text, index=0):
         for i in range(nr_of_exercises):
             exercise = exercise_find_all("diminutive", text)
             exercises.append(exercise)
-    
     elif type == "plural_form":
-        nouns = find_specific_POS("NOUN", morphemes)  # find all nouns
         if nouns:  # Only proceed if we have nouns
             i = 0
             count = 0
@@ -540,17 +546,20 @@ def add_exercises(type, nr_of_exercises, morphemes, text, index=0):
             print("Warning: No nouns found for plural form exercises")
     
     elif type == "singular_form":
-        # Add singular form exercises
-        count = 0
-        i = 0
-        max_attempts = len(morphemes) * 2
-        while count < nr_of_exercises and i < max_attempts:
-            word_idx = (i + index - 1) % len(morphemes)
-            exercise = exercise_singular_form(morphemes[word_idx])
-            if exercise:  # If we found a valid exercise
-                exercises.append(exercise)
-                count += 1
-            i += 1
+        if nouns:  # Only proceed if we have nouns
+            i = 0
+            count = 0
+            # Loop with a maximum number of attempts to prevent infinite loop
+            max_attempts = len(nouns) * 2
+            while count < nr_of_exercises and i < max_attempts:
+                word_idx = i % len(nouns)  # Wrap around when needed
+                exercise = exercise_singular_form(nouns[word_idx])
+                if exercise != (None, None):
+                    exercises.append(exercise)
+                    count += 1
+                i += 1
+        else:
+            print("Warning: No nouns found for singular form exercises")
         
     elif type == "affix_matching":
         # For affix_matching, we generate a complete new exercise with nr_of_exercises items
