@@ -2,25 +2,20 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.urls import reverse
 import json
-from .utils import generate_exercises, generate_exercise_given_word
+from .utils import generate_exercises
 from .utils import add_exercises as utils_add_exercises
 from .utils import generate_exercise_given_word as utils_generate_exercise_given_word
 from django.utils.html import escape, mark_safe
 import re
-from .utils import generate_exercises, generate_exercise_given_word, exercise_plural_form, exercise_singular_form
-from .utils import add_exercises as utils_add_exercises
-from .utils import generate_exercise_given_word as utils_generate_exercise_given_word
 import traceback
-
 from django.views.decorators.csrf import csrf_exempt #REMOVE FOR PRODUCTION
-
 #for pdf generation
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 
 exercise_types = {"identify": "Identificeer morfemen", #hard
-                   "fill_in_the_blank": "Invullen", #?
+                   "fill_in_the_blank": "Invullen", #medium
                    "alternative": "Alternatieve vorm", #hard
                    "wrong_word_sentence": "Fout woord in zin", #medium
                    "affix_matching": "Achtervoegsels matchen", # medium?
@@ -32,7 +27,7 @@ exercise_types = {"identify": "Identificeer morfemen", #hard
                    } 
 
 # these exercise types are not used in the dropdown menu (use this for exercises that do not depend on a single word)
-exercise_types_ignore = ["affix_matching", "find_compounds"]
+exercise_types_ignore = ["affix_matching", "find_compounds", "find_plurals", "find_diminutives"]
 
 # example for each exercise type
 exercise_examples = {"identify" : "Identificeer de morfemen in het woord 'onvergetelijk'.",
@@ -175,41 +170,41 @@ def generate(request):
 
             if "easy" in difficulty:
                 nr_of_identify += 0
-                nr_of_fill_in_blanks += 2
-                nr_of_alternative += 2
-                nr_of_wrong_words += 2
-                nr_of_affix += 2
-                nr_of_plural_form += 2  
+                nr_of_fill_in_blanks += 0
+                nr_of_alternative += 0
+                nr_of_wrong_words += 0
+                nr_of_affix += 0
+                nr_of_plural_form += 0
                 nr_of_singular_form += 0
-                nr_find_compounds += 0
-                nr_find_plurals = 1
-                nr_find_diminutives = 1
+                nr_find_compounds += 1
+                nr_find_plurals += 1
+                nr_find_diminutives += 1
 
 
             if "medium" in difficulty:
                 nr_of_identify += 0
-                nr_of_fill_in_blanks += 0
+                nr_of_fill_in_blanks += 3
                 nr_of_alternative += 0
-                nr_of_wrong_words += 2
-                nr_of_affix += 2
-                nr_find_compounds += 2
-                nr_of_plural_form += 2
-                nr_of_singular_form += 1
-                nr_find_plurals = 0
-                nr_find_diminutives = 0
+                nr_of_wrong_words += 3
+                nr_of_affix += 1
+                nr_find_compounds += 0
+                nr_of_plural_form += 3
+                nr_of_singular_form += 3
+                nr_find_plurals += 0
+                nr_find_diminutives += 0
 
 
             if "hard" in difficulty:
-                nr_of_identify += 0
+                nr_of_identify += 2
                 nr_of_fill_in_blanks += 0
-                nr_of_alternative += 0
+                nr_of_alternative += 2
                 nr_of_wrong_words += 0
-                nr_of_affix += 2
-                nr_of_plural_form += 2
-                nr_of_singular_form += 2
-                nr_find_compounds += 2
-                nr_find_plurals = 0
-                nr_find_diminutives = 0
+                nr_of_affix += 0
+                nr_of_plural_form += 0
+                nr_of_singular_form += 0
+                nr_find_compounds += 0
+                nr_find_plurals += 0
+                nr_find_diminutives += 0
 
 
             

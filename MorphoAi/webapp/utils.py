@@ -96,7 +96,7 @@ def exercise_fill_in_the_blank(dict_word):
     }
     """
     word = dict_word['word']
-    prompt = f"Generate a Dutch sentence containing the Dutch word '{word}', but in a changed form. For example, change the tense, make it plural or anything else (but don't add new morphemes to the word). Make sure the sentence is grammatically correct. The sentence should be a complete sentence and not just a fragment. Return your answer formatted as JSON with two keys: sentence (containing the full sentence including the word) and word (containing the modified word)  Do not include any markdown formatting like triple backticks in your answer. Just return the plain text of the sentence."	
+    prompt = f"Generate a Dutch sentence containing the Dutch word '{word}', but in a changed form. For example, change the tense, make it plural/singular (but don't add new morphemes to the word). Make sure the sentence is grammatically correct. The sentence should be a complete sentence and not just a fragment. DO NOT return the exact same form I gave you ({word}). Return your answer formatted as JSON with two keys: sentence (containing the full sentence including the word) and word (containing the modified word). Do not include any markdown formatting like triple backticks in your answer. Just return the plain text of the sentence."	
     output_json = generate_text(prompt)
     output = remove_markdown(output_json)
     output = json.loads(output)
@@ -222,7 +222,7 @@ def exercise_error_correction(dict_word):
     """
     word = dict_word['word']
     prompt = (
-        f"Generate a sentence in Dutch for the word '{word}' where the word is used in its wrong form. "
+        f"Generate a sentence in Dutch for the word '{word}' where the word is used in its wrong form, for example in the wrong tense, plural or singular form. "
         "For example, a similar english sentence could be if the word is 'run' then the sentence is 'He runned fast'.\n"
         "Answer format: sentence: <sentence>\nanswer: wrong_word = correct_word"
     )
@@ -301,54 +301,23 @@ def exercise_singular_form(dict_word):
     # Simplified prompt that just asks for the singular form
     prompt = (
         f"What is the singular form of the Dutch word '{word}'? "
-        f"Return ONLY the singular form as plain text. If the word is already "
-        f"in singular form, return a different word that's related to it. "
-        f"Don't include explanations."
+        f"Return ONLY the singular form as plain text. Don't include explanations. "
+        f"If the word is already in singular form, return the word 'SINGULAR' (space) and the plural form."
     )
     
-    try:
-        singular_form = generate_text(prompt).strip()
+    
+    singular_form = generate_text(prompt).strip()
+    print("word: ", word, "singular: ", singular_form)
+    # Basic validation - make sure we got something different than the input
+    if  "SINGULAR" in singular_form:
+        plural = singular_form.split(" ")[1]
+        exercise_text = f"Give the singular form of the word: {plural}"
+        return ("singular_form", exercise_text, word)
+    
+    exercise_text = f"Give the singular form of the word: {word}"
+    answer_text = singular_form    
+    return ("singular_form", exercise_text, answer_text)
         
-        # Basic validation - make sure we got something different than the input
-        if not singular_form or singular_form == word:
-            # If LLM returns the same word, try to find a related word
-            backup_prompt = (
-                f"If the Dutch word '{word}' is already singular, provide a "
-                f"related singular noun. If it's plural, give its singular form. "
-                f"Return ONLY the word."
-            )
-            singular_form = generate_text(backup_prompt).strip()
-        
-        # Final fallback - always provide something
-        if not singular_form or singular_form == word:
-            # Simple heuristic fallback
-            if word.endswith('en'):
-                singular_form = word[:-2]
-            elif word.endswith('s'):
-                singular_form = word[:-1]
-            else:
-                # If we can't determine a good singular form, use a prefix like "één" (one)
-                singular_form = "één " + word
-        
-        # Build the exercise and answer
-        exercise_text = f"Give the singular form of the word: {word}"
-        answer_text = singular_form
-        
-        return ("singular_form", exercise_text, answer_text)
-        
-    except Exception as e:
-        print(f"Error in singular form exercise for '{word}': {e}")
-        # Fallback to a simple heuristic if everything else fails
-        if word.endswith('en'):
-            singular_form = word[:-2]
-        elif word.endswith('s'):
-            singular_form = word[:-1]
-        else:
-            singular_form = "één " + word
-            
-        exercise_text = f"Give the singular form of the word: {word}"
-        answer_text = singular_form
-        return ("singular_form", exercise_text, answer_text)
 
 def find_specific_POS(pos_tag, dict_words):
     """
@@ -475,15 +444,18 @@ def generate_exercises(text, easy_extra, nr_of_identify, nr_of_fill_in_blanks, n
     word_index += nr_of_plural
 
     # Add singular form exercises
-    if nr_of_singular > 0:
-        for i in range(nr_of_singular):
-            # Try a few words to find one that works
-            for attempt in range(min(len(morphemes), 5)):  # Limit attempts
-                word_idx = (i + word_index + attempt) % len(morphemes)
-                exercise = exercise_singular_form(morphemes[word_idx])
-                if exercise:  # If we found a valid exercise
-                    exercises.append(exercise)
-                    break
+    if nouns:  # Only proceed if we have nouns
+        i = 0
+        count = 0
+        while count < nr_of_singular and i < len(nouns) * 2:  # Add a limit to prevent infinite loop
+            # Use modulo to wrap around nouns list
+            noun_idx = i % len(nouns)
+            exercise = exercise_singular_form(nouns[noun_idx])
+            if exercise != (None, None):
+                exercises.append(exercise)
+                count += 1
+            i += 1
+    word_index += nr_of_singular
     
     # Add affix matching exercises
     if nr_affix > 0 and len(morphemes) > 0:

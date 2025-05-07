@@ -174,17 +174,17 @@ body, .dropdown, .card-body {
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Download Options</h5>
+                <h5 class="modal-title">Opties</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <p>Select the version you want to download:</p>
+                <p>Selecteer de versie die u wilt downloaden:</p>
                 <div class="d-grid gap-2">
                     <a href="{% url 'download_exercises' %}?version=student" class="btn btn-primary btn-lg">
-                        <i class="fas fa-user-graduate"></i> Student Version (Questions Only)
+                        <i class="fas fa-user-graduate"></i> Leerling (opdrachten)
                     </a>
                     <a href="{% url 'download_exercises' %}?version=teacher" class="btn btn-success btn-lg">
-                        <i class="fas fa-chalkboard-teacher"></i> Teacher Version (With Answers)
+                        <i class="fas fa-chalkboard-teacher"></i> Docent (opdrachten en antwoorden)
                     </a>
                 </div>
             </div>
