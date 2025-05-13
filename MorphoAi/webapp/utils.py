@@ -145,9 +145,9 @@ def exercise_alternative_form(dict_word):
     )
 
     if alternatives:
-        answer_text = f"Example answers: {', '.join(alternatives)}. Other answers could include plural forms, compound words, or verb forms."
+        answer_text = f"Mogelijke antwoorden: {', '.join(alternatives)}. Andere mogelijke antwoorden kunnen bijv. meervoudsvormen, samengestelde woorden of werkwoordsvormen zijn."
     else:
-        answer_text = "Other answers could include plural forms, compound words, or verb forms."
+        answer_text = "Mogelijke antwoorden kunnen bijv. meervoudsvormen, samengestelde woorden of werkwoordsvormen zijn."
 
     return ("alternative_form", exercise_text, answer_text)
 

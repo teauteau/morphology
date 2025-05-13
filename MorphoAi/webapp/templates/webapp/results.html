@@ -104,7 +104,7 @@ body, .dropdown, .card-body {
 
                     <!-- Add Exercises Form -->
                     <button class="btn btn-outline-primary btn-sm mt-4" type="button" data-bs-toggle="collapse" data-bs-target="#addExercisesCollapse" aria-expanded="false" aria-controls="addExercisesCollapse">
-                        Add generated exercises
+                        Voeg gegenereerde oefeningen toe
                     </button>
                     <div class="collapse mt-2" id="addExercisesCollapse">
                         {% for exercise_type, exercise_name in exercise_types.items %}
@@ -122,14 +122,14 @@ body, .dropdown, .card-body {
                     <div class="mt-2">
                         <!-- <hr> -->
                         <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#customExerciseCollapse" aria-expanded="false" aria-controls="customExerciseCollapse">
-                            Add custom exercise
+                            Voeg je eigen oefening toe
                         </button>
                         <div class="collapse mt-2" id="customExerciseCollapse">
                             <div class="card">
                                 <div class="card-body bg-light">
                                     <form id="customExerciseForm">
                                         <div class="mb-3">
-                                            <label for="exerciseType" class="form-label">Exercise Type</label>
+                                            <label for="exerciseType" class="form-label">Type oefening</label>
                                             <select class="form-control" id="exerciseType">
                                                 <option value="custom">Custom Exercise</option>
                                                 <option value="identify">Identify Morphemes</option>
@@ -139,17 +139,17 @@ body, .dropdown, .card-body {
                                                 <option value="plural_form">Plural Form</option>
                                                 <option value="singular_form">Singular Form</option>
                                             </select>
-                                            <small class="form-text text-muted">Select the type of exercise to group it appropriately.</small>
+                                            <small class="form-text text-muted">Selecteer het juiste type om deze op de juiste manier te groeperen.</small>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="exerciseText" class="form-label">Exercise Question</label>
-                                            <textarea class="form-control" id="exerciseText" rows="3" placeholder="Enter your exercise question here..." required></textarea>
+                                            <label for="exerciseText" class="form-label">Oefening vraag</label>
+                                            <textarea class="form-control" id="exerciseText" rows="3" placeholder="Typ hier de vraag..." required></textarea>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="answerText" class="form-label">Answer</label>
-                                            <textarea class="form-control" id="answerText" rows="2" placeholder="Enter the answer here..."></textarea>
+                                            <label for="answerText" class="form-label">Antwoord</label>
+                                            <textarea class="form-control" id="answerText" rows="2" placeholder="Typ hier het antwoord..."></textarea>
                                         </div>
-                                        <button type="submit" class="btn btn-sm btn-outline-success">Add exercise</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Voeg opdracht toe</button>
                                     </form>
                                 </div>
                             </div>
