@@ -195,15 +195,15 @@ def generate(request):
 
             if "easy" in difficulty:
                 nr_of_identify += 0
-                nr_of_fill_in_blanks += 0
+                nr_of_fill_in_blanks += 5
                 nr_of_alternative += 0
                 nr_of_wrong_words += 0
                 nr_of_affix += 0
                 nr_of_plural_form += 0
                 nr_of_singular_form += 0
-                nr_find_compounds += 1
-                nr_find_plurals += 1
-                nr_find_diminutives += 1
+                nr_find_compounds += 0
+                nr_find_plurals += 0
+                nr_find_diminutives += 0
 
 
             if "medium" in difficulty:

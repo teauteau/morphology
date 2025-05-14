@@ -96,15 +96,22 @@ def exercise_fill_in_the_blank(dict_word):
     }
     """
     word = dict_word['word']
-    prompt = f"Generate a Dutch sentence containing the Dutch word '{word}', but in a changed form. For example, change the tense, make it plural/singular (but don't add new morphemes to the word). Make sure the sentence is grammatically correct. The sentence should be a complete sentence and not just a fragment. DO NOT return the exact same form I gave you ({word}). Return your answer formatted as JSON with two keys: sentence (containing the full sentence including the word) and word (containing the modified word). Do not include any markdown formatting like triple backticks in your answer. Just return the plain text of the sentence."	
+    # prompt = f"Generate a Dutch sentence containing the Dutch word '{word}', but in a changed form. For example, change the tense, make it plural/singular (but don't add new morphemes to the word). Make sure the sentence is grammatically correct. The sentence should be a complete sentence and not just a fragment. DO NOT return the exact same form I gave you ({word}). Return your answer formatted as JSON with two keys: sentence (containing the full sentence including the word) and word (containing the modified word). Do not include any markdown formatting like triple backticks in your answer. Just return the plain text of the sentence."	
+    
+    # prompt = f"First get the root form or infinitive of the Dutch word '{word}'. Then, change the word to plural/singular or change the tense. Generate a Dutch sentence that contains that changed word that is grammatically correct. The sentence should be a complete sentence and not just a fragment. The word SHOULD NOT be in the exact same form as the root from. Return your answer formatted as JSON with three keys: sentence (containing the full sentence including the word), root (containing the root or infinitive of the original word) and changed_word (containing the changed version of the word). Do not include any markdown formatting like triple backticks in your answer. " 
+    
+    prompt = f"You have two tasks. Task 1: find the infiniive or root form of the Dutch word {word}, from now referred to as 'root'. Task 2: change the tense of the root word OR make it plural OR . Then generate a full Dutch sentence with the new word. It should be DIFFERENT than the root from. Return your answer formatted as JSON with three keys: root (containing the root),  sentence (containing the full sentence including the word), and changed_word (containing the changed version of the word like in the sentence). Do not include any markdown formatting like triple backticks in your answer. " 
     output_json = generate_text(prompt)
     output = remove_markdown(output_json)
     output = json.loads(output)
+    
     sentence = output['sentence']
-    modified_word = output['word']
+    # modified_word = output['word']
+    root = output['root']
+    modified_word = output['changed_word']
     sentence_blanked = re.sub(modified_word, '_____', sentence)
     #exercise_text = f"Fill in the blank in the following sentence: \n ({word}) {sentence_blanked}"
-    exercise_text = f"({word}) {sentence_blanked}"
+    exercise_text = f"({root}) {sentence_blanked}"
     answer_text = modified_word
     return ("fill_in_the_blank", exercise_text, answer_text)
 
