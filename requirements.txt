@@ -1,4 +1,6 @@
 Django==5.1.7
 protobuf==6.30.2
 spacy==3.8.5
+nl_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/nl_core_news_sm-3.7.0/nl_core_news_sm-3.7.0-py3-none-any.whl
 xhtml2pdf==0.2.17
+google-genai==0.3.2
