@@ -3,7 +3,21 @@
 {% if grouped_exercises %}
 {% for group in grouped_exercises %}
 <div class="exercise-group">
-  <h6 class="group-heading m-3">{{ group.heading }}</h6>
+
+
+<div class="group-heading position-relative m-3">
+  <!-- Main content container with right padding for badge -->
+  <div class="pe-4" style="margin-right: 4rem; margin-left: 4rem;"> <!-- Adjust 4rem based on your badge width -->
+    <h6 class="text-center">{{ group.heading }}</h6>
+  </div>
+  
+  <!-- Right-aligned badge -->
+  <span class="badge border border-secondary text-secondary position-absolute top-50 end-0 translate-middle-y">
+    {{ group.difficulty }}
+  </span>
+</div>
+
+
   {% for exercise, answer in group.exercises %}
   <div class="list-group-item">
     <!-- Exercise text -->

@@ -71,24 +71,31 @@ body, .dropdown, .card-body {
             Opslaan
         </button>
     </div>
-    
 
     <div class="row">
         <!-- LEFT COLUMN -->
         <div class="col-md-4" id="info-column">  <!-- Adjust width by changing col-md-4 -->
             <!-- Text Section -->
-            <div class="card shadow-sm mb-4">
+            <div class="card shadow-sm">
                 <div class="card-body pl-4 pr-4">
                     <h4 class="card-title mb-3">Ingevoerde Tekst</h4>
                     <div class="card-text text-muted text-start">{{ text_html|safe }}</div>
                 </div>
             </div>
 
+            <!-- Explanation -->
+            <div class="alert alert-light border mt-3 mb-4 p-3 small text-muted text-start">
+                <i class="bi bi-info-circle-fill text-primary "></i>
+                <!-- <strong>Uitleg:</strong>  -->
+                In de bovenstaande tekst zijn de woorden gemarkeerd die gebruikt zijn voor het genereren van de oefeningen. Door op een woord te klikken, kunt u een nieuwe oefening genereren met het gekozen woord.
+            </div>
+
+
             <!-- Difficulty Level -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    <h4 class="card-title">Geselecteerde Moeilijkheidsgraad</h4>
-                    <span class="badge bg-primary fs-5">{{ difficulty }}</span>
+                    <h4 class="card-title mb-3">Geselecteerde moeilijkheidsgraad</h4>
+                    <span class="badge bg-secondary fs-6">{{ difficulty_text }}</span>
                 </div>
             </div>
         </div>

@@ -64,6 +64,28 @@ def group_exercises(exercises):
         "easy_extra": "Beantwoord de volgende vragen:",
 
     }
+    # exercise difficulty
+    exercise_difficulty = {
+        "identify": "easy",
+        "fill_in_the_blank":"medium" ,
+        "alternative_form": "medium",
+        "error_correction": "hard",
+        "find_compound":"easy" ,
+        "find_plural": "easy",
+        "find_diminutive": "easy",
+        "plural_form":"medium" ,
+        "singular_form": "medium",
+        "affix_matching": "hard" ,
+        "easy_extra": "easy_extra" ,
+
+    }
+    
+    difficulty_translations = {
+        'easy': 'Makkelijk',
+        'medium': 'Gemiddeld',
+        'hard': 'Moeilijk',
+        'easy_extra': 'Generiek'
+    }
     
     # Dictionary to hold grouped exercises
     grouped = {}
@@ -131,10 +153,13 @@ def group_exercises(exercises):
         grouped[ex_type]["exercises"].append((formatted_content, ex_answer))
     
     # Convert to list format for template rendering
+    
+    
     result = []
     for ex_type, data in grouped.items():
         result.append({
             "type": ex_type,
+            "difficulty" : difficulty_translations.get(exercise_difficulty.get(ex_type, 'Onbekend'), 'Onbekend'),
             "heading": data["heading"],
             "exercises": data["exercises"]
         })
@@ -224,7 +249,7 @@ def generate(request):
                 nr_of_plural_form,  
                 nr_of_singular_form  
 
-            )            
+            )      
             
             # Store in session
             request.session["text"] = text
@@ -279,12 +304,25 @@ def results_page(request):
     # Group the exercises
     grouped_exercises = group_exercises(exercises)
     
+    # tokenize text and embolden important words
+    
+    # English to dutch translation for difficulty level
     text_html = embolden(text, important_words)
+    difficulty_translations = {
+        'easy': 'Makkelijk',
+        'medium': 'Gemiddeld',
+        'hard': 'Moeilijk',
+        'easy_extra': 'Generieke oefeningen'
+    }
+    
+    difficulty_text = [difficulty_translations.get(d, d) for d in difficulty]          
+    difficulty_text = ', '.join(difficulty_text)
 
     return render(request, "webapp/results.html", {
         "text_html": text_html,
         "text": text,
         "difficulty": difficulty,
+        "difficulty_text": difficulty_text,
         "exercises": exercises,  # Keep the original for backward compatibility
         "grouped_exercises": grouped_exercises,  # Add the grouped exercises
         "exercise_types": filtered_exercise_types,  # Use the filtered dictionary

@@ -8,10 +8,58 @@
     </div>
     <h1 class="display-4">Genereer uw opdrachten</h1>
 
-    <h3 class="mt-4">1. Voer uw tekst in</h3>
+    
+
+    <!-- <h3 class="mt-4">1. Voer uw tekst in</h3> -->
+    <div class="text-center mt-4"> <!-- Center container -->
+        <div class="d-inline-flex align-items-center"> <!-- Inline flex for heading+button -->
+            <h3 class="mb-0 me-3">Voer uw tekst in</h3>
+            <button class="btn btn-link p-0 border-0 text-decoration-none d-flex align-items-center" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#explanationCard">
+            <i class="bi bi-info-circle text-primary fs-5 me-1"></i>
+            <span class="text-primary small">Uitleg</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Explanation -->
+    <div class="collapse" id="explanationCard">
+        <div class="alert alert-light border mt-2 mb-3 p-3 small">
+            <i class="bi bi-info-circle-fill text-primary me-2"></i>
+            Some information about copy-pasting text from pdf or something else i dont know
+        </div>
+    </div>
+
+
     <textarea id="text-input" class="form-control mt-3" placeholder="Plak hier uw tekst..." rows="8"></textarea>
 
-    <h3 class="mt-4">2. Selecteer de moeilijkheidsgraad</h3>
+
+
+    <!-- <h3 class="mt-4"> Selecteer de moeilijkheidsgraad</h3> -->
+
+     <div class="text-center mt-4"> <!-- Center container -->
+        <div class="d-inline-flex align-items-center"> <!-- Inline flex for heading+button -->
+            <h3 class="mb-0 me-3">Selecteer de moeilijkheidsgraad</h3>
+            <button class="btn btn-link p-0 border-0 text-decoration-none d-flex align-items-center" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#explanationCardDiff">
+            <i class="bi bi-info-circle text-primary fs-5 me-1"></i>
+            <span class="text-primary small">Uitleg</span>
+            </button>
+        </div>
+    </div>
+    <!-- Explanation -->
+    <div class="collapse" id="explanationCardDiff">
+        <div class="alert alert-light border mt-2 mb-3 p-3 small">
+            <i class="bi bi-info-circle-fill text-primary me-2"></i>
+            U kunt meerdere moeilijkheidsgraden selecteren
+        </div>
+    </div>
+
+    <!-- Difficulty level buttons -->
     <div class="btn-group mt-4" role="group">
         <button
         id = "easy"
@@ -29,8 +77,7 @@
         <button id="medium" class="btn btn-warning difficulty-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Gebaseerd op Bloom's taxonomie niveaus 3 en 4">Gemiddeld</button>
         <button id="hard" class="btn btn-danger difficulty-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Gebaseerd op Bloom's taxonomie niveaus 5 en 6"><span class="btn-text">Moeilijk</span></button>
     </div>
-
-
+    <!-- extra info on generic exercises -->
     <div class="collapse mt-3" id="easyCard">
         <div class="card card-body">
           <div class="d-flex justify-content-center  gap-3">
@@ -43,6 +90,10 @@
 
         </div>
       </div>
+    
+
+
+
 
   </div>
     <!-- <br> -->
