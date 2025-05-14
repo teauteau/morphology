@@ -1,0 +1,4 @@
+Django==5.1.7
+protobuf==6.30.2
+spacy==3.8.5
+xhtml2pdf==0.2.17
