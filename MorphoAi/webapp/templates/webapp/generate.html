@@ -90,14 +90,20 @@
 
         </div>
       </div>
-    
-
-
-
-
   </div>
-    <!-- <br> -->
-    <button id="generate-btn" class="btn btn-dark btn-lg mt-4" disabled>Genereer</button>
+  
+  <!-- Generate button and loading spinner in a centered container -->
+  <div class="text-center mt-4">
+    <button id="generate-btn" class="btn btn-dark btn-lg" disabled>Genereer</button>
+    
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="d-none mt-3">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Laden...</span>
+      </div>
+      <p class="mt-2">Even geduld, de oefeningen worden gegenereerd...</p>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -173,6 +179,12 @@
         color: white;
         transform: scale(1.02);
     }
+    
+    /* Loading spinner styles */
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
 </style>
 
 <script>
@@ -201,6 +213,7 @@ const textInput = document.getElementById("text-input");
 const generateBtn = document.getElementById("generate-btn");
 const difficultyButtons = document.querySelectorAll(".difficulty-btn");
 const difficultyToggle = document.getElementById("easyToggle");
+const loadingSpinner = document.getElementById("loading-spinner");
 let selectedDifficulties = new Set();
 
 // Event listener for text input to enable the generate button
@@ -272,11 +285,12 @@ generateBtn.addEventListener("click", async (event) => {
     const text = textInput.value.trim();
     if (!text) return;
 
+    // Change the button text and show the spinner
     generateBtn.innerText = "Even geduld...";
     generateBtn.disabled = true;
+    loadingSpinner.classList.remove("d-none");
 
     try {
-
         const levels = Array.from(selectedDifficulties); // Convert Set to Array
         console.log(levels)
         const response = await fetch("{% url 'generate' %}", {
@@ -290,18 +304,32 @@ generateBtn.addEventListener("click", async (event) => {
 
         const data = await response.json();
         if (data.result_url) {
+            // Set a timeout to ensure the spinner is hidden if the redirect doesn't happen
+            setTimeout(() => {
+                loadingSpinner.classList.add("d-none");
+                generateBtn.innerText = "Genereer";
+                generateBtn.disabled = false;
+            }, 5000); // 5 second timeout as a fallback
+            
             window.location.href = data.result_url; // Redirect to results page
         } else {
             console.error("Fout:", data.error);
             showError("Er is iets misgegaan bij het genereren. Foutmelding: " + data.error);
+            
+            // Hide spinner and restore button
+            loadingSpinner.classList.add("d-none");
+            generateBtn.innerText = "Genereer";
+            generateBtn.disabled = false;
         }
     } catch (error) {
         console.error("Error:", error);
         showError("Er is een fout opgetreden. Controleer je verbinding of probeer het later opnieuw.");
+        
+        // Hide spinner and restore button
+        loadingSpinner.classList.add("d-none");
+        generateBtn.innerText = "Genereer";
+        generateBtn.disabled = false;
     }
-
-    generateBtn.innerText = "Genereer";
-    generateBtn.disabled = false;
 });
 
 

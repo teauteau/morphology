@@ -47,15 +47,17 @@ body, .dropdown, .card-body {
     overflow: visible !important;
 }
 
-/* .group-heading {
-    font-weight: bold;
-    color: #333;
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #dee2e6;
-} */
+/* Loading spinner styles */
+#loading-indicator {
+    display: none;
+    margin: 20px auto;
+    text-align: center;
+}
 
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
 </style>
 <div class="container-fluid results-wrapper">
     <div  class="d-flex align-items-center justify-content-center ">
@@ -110,9 +112,11 @@ body, .dropdown, .card-body {
                     </div>
 
                     <!-- Add Exercises Form -->
-                    <button class="btn btn-outline-primary btn-sm mt-4" type="button" data-bs-toggle="collapse" data-bs-target="#addExercisesCollapse" aria-expanded="false" aria-controls="addExercisesCollapse">
-                        Voeg gegenereerde oefeningen toe
-                    </button>
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#addExercisesCollapse" aria-expanded="false" aria-controls="addExercisesCollapse">
+                            Voeg gegenereerde oefeningen toe
+                        </button>
+                    </div>
                     <div class="collapse mt-2" id="addExercisesCollapse">
                         {% for exercise_type, exercise_name in exercise_types.items %}
                             <div class="form-group row justify-content-center mb-2">
@@ -122,11 +126,21 @@ body, .dropdown, .card-body {
                                 </div>
                             </div>
                         {% endfor %}
-                        <button id="generate-new-exercises-btn" class="btn btn-sm btn-outline-success mt-2">Generate exercises</button>
+                        <div class="text-center mt-3">
+                            <button id="generate-new-exercises-btn" class="btn btn-sm btn-outline-success">Generate exercises</button>
+                            
+                            <!-- Loading Spinner for generate new exercises -->
+                            <div id="loading-indicator" class="mt-2">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">Laden...</span>
+                                </div>
+                                <p class="text-muted small">Oefeningen genereren...</p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Add Your Own Exercise Form -->
-                    <div class="mt-2">
+                    <div class="mt-2 text-center">
                         <!-- <hr> -->
                         <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#customExerciseCollapse" aria-expanded="false" aria-controls="customExerciseCollapse">
                             Voeg je eigen oefening toe
@@ -425,8 +439,17 @@ function showAlert(message, type) {
 document.addEventListener('DOMContentLoaded', function() {
   // Add exercises button
   const generateNewExercisesBtn = document.getElementById('generate-new-exercises-btn');
-  if (generateNewExercisesBtn) {
+  const loadingIndicator = document.getElementById('loading-indicator');
+  
+  if (generateNewExercisesBtn && loadingIndicator) {
+    // Initially hide the loading indicator
+    loadingIndicator.style.display = 'none';
+    
     generateNewExercisesBtn.addEventListener('click', function() {
+      // Show loading indicator and disable the button
+      loadingIndicator.style.display = 'block';
+      generateNewExercisesBtn.disabled = true;
+      
       const exercises = [];
       document.querySelectorAll('.exercise-input').forEach(input => {
         exercises.push({
@@ -453,10 +476,23 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(html => {
         document.getElementById('exercises-results').innerHTML = html;
         showAlert("New exercises added successfully", "success");
+        
+        // Hide loading indicator and re-enable the button
+        loadingIndicator.style.display = 'none';
+        generateNewExercisesBtn.disabled = false;
       })
       .catch(error => {
         console.error('Error:', error);
         showAlert(error.message, "danger");
+        
+        // Hide loading indicator and re-enable the button even if there's an error
+        loadingIndicator.style.display = 'none';
+        generateNewExercisesBtn.disabled = false;
+      })
+      .finally(() => {
+        // Ensure the spinner is hidden and button is re-enabled in all cases
+        loadingIndicator.style.display = 'none';
+        generateNewExercisesBtn.disabled = false;
       });
     });
   }
