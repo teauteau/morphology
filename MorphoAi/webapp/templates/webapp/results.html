@@ -47,17 +47,15 @@ body, .dropdown, .card-body {
     overflow: visible !important;
 }
 
-/* Loading spinner styles */
-#loading-indicator {
-    display: none;
-    text-align: center;
-    margin: 10px 0;
-}
+/* .group-heading {
+    font-weight: bold;
+    color: #333;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+} */
 
-.spinner-border {
-    width: 2rem;
-    height: 2rem;
-}
 </style>
 <div class="container-fluid results-wrapper">
     <div  class="d-flex align-items-center justify-content-center ">
@@ -112,34 +110,20 @@ body, .dropdown, .card-body {
                     </div>
 
                     <!-- Add Exercises Form -->
-<div class="mt-4 text-center">
-  <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#addExercisesCollapse" aria-expanded="false" aria-controls="addExercisesCollapse">
-    Voeg gegenereerde oefeningen toe
-  </button>
-</div>
-
-<div class="collapse mt-2" id="addExercisesCollapse">
-  {% for exercise_type, exercise_name in exercise_types.items %}
-    <div class="form-group row justify-content-center mb-2">
-      <label for="exercise{{forloop.counter}}" class="col-sm-4 col-form-label text-right" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="<i>Bijv. {{ exercise_examples|dict_get:exercise_type }}</i>">{{exercise_name}}</label>
-      <div class="col-sm-6">
-        <input type="number" class="form-control exercise-input" id="{{exercise_type}}" min="0" max="5" step="1" value="0" minlength="1">
-      </div>
-    </div>
-  {% endfor %}
-  
-  <div class="text-center mt-3">
-    <button id="generate-new-exercises-btn" class="btn btn-sm btn-outline-success">Generate exercises</button>
-    
-    <!-- Loading Spinner for generate new exercises -->
-    <div id="loading-indicator" style="display:none;" class="mt-2">
-      <div class="spinner-border text-success" role="status">
-        <span class="visually-hidden">Laden...</span>
-      </div>
-      <p class="text-muted small">Oefeningen genereren...</p>
-    </div>
-  </div>
-</div>
+                    <button class="btn btn-outline-primary btn-sm mt-4" type="button" data-bs-toggle="collapse" data-bs-target="#addExercisesCollapse" aria-expanded="false" aria-controls="addExercisesCollapse">
+                        Voeg gegenereerde oefeningen toe
+                    </button>
+                    <div class="collapse mt-2" id="addExercisesCollapse">
+                        {% for exercise_type, exercise_name in exercise_types.items %}
+                            <div class="form-group row justify-content-center mb-2">
+                                <label for="exercise{{forloop.counter}}" class="col-sm-4 col-form-label text-right" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="<i>Bijv. {{ exercise_examples|dict_get:exercise_type }}</i>">{{exercise_name}}</label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="form-control exercise-input" id="{{exercise_type}}" min="0" max="5" step="1" value="0" minlength="1">
+                                </div>
+                            </div>
+                        {% endfor %}
+                        <button id="generate-new-exercises-btn" class="btn btn-sm btn-outline-success mt-2">Generate exercises</button>
+                    </div>
 
                     <!-- Add Your Own Exercise Form -->
                     <div class="mt-2">
@@ -334,6 +318,8 @@ function saveEdit(typeIndex) {
     })
   }).then(res => {
     if (!res.ok) {
+      showAlert("Error when updating exercise", "danger");
+    } else {
       showAlert("Exercise updated successfully", "success");
     }
   });
@@ -439,60 +425,42 @@ function showAlert(message, type) {
 document.addEventListener('DOMContentLoaded', function() {
   // Add exercises button
   const generateNewExercisesBtn = document.getElementById('generate-new-exercises-btn');
-  const loadingIndicator = document.getElementById('loading-indicator');
-  
-if (generateNewExercisesBtn) {
-  generateNewExercisesBtn.addEventListener('click', function() {
-    // Disable button and show loading indicator
-    generateNewExercisesBtn.disabled = true;
-    loadingIndicator.style.display = 'block';
-    
-    const exercises = [];
-    document.querySelectorAll('.exercise-input').forEach(input => {
-      exercises.push({
-        type: input.id,
-        count: input.value
+  if (generateNewExercisesBtn) {
+    generateNewExercisesBtn.addEventListener('click', function() {
+      const exercises = [];
+      document.querySelectorAll('.exercise-input').forEach(input => {
+        exercises.push({
+          type: input.id,
+          count: input.value
+        });
+      });
+      
+      fetch("{% url 'add_exercises' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({exercises: exercises, text: "{{text|escapejs}}"})
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Failed to generate exercises");
+        }
+        return response.text();
+      })
+      .then(html => {
+        document.getElementById('exercises-results').innerHTML = html;
+        showAlert("New exercises added successfully", "success");
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showAlert(error.message, "danger");
       });
     });
-    
-    fetch("{% url 'add_exercises' %}", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRFToken': getCsrfToken()
-      },
-      body: JSON.stringify({exercises: exercises, text: "{{text|escapejs}}"})
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("Failed to generate exercises");
-      }
-      return response.text();
-    })
-    .then(html => {
-      document.getElementById('exercises-results').innerHTML = html;
-      showAlert("New exercises added successfully", "success");
-      
-      // Re-enable button and hide loading indicator
-      loadingIndicator.style.display = 'none';
-      generateNewExercisesBtn.disabled = false;
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      showAlert(error.message, "danger");
-      
-      // Re-enable button and hide loading indicator
-      loadingIndicator.style.display = 'none';
-      generateNewExercisesBtn.disabled = false;
-    })
-    .finally(() => {
-      // Add this finally block to ensure these lines run regardless of success or error
-      loadingIndicator.style.display = 'none';
-      generateNewExercisesBtn.disabled = false;
-    });
-  });
-}
+  }
+
   // Custom Exercise Form handling
   const customExerciseForm = document.getElementById('customExerciseForm');
   if (customExerciseForm) {
