@@ -174,8 +174,13 @@ def generate(request):
             text = data.get("text", "").strip()
             difficulty = data.get("difficulty", "")
             
+            
+
+            
             if not text or not difficulty:
                 return JsonResponse({"error": "Geen tekst ontvangen"}, status=400)
+            if len(text.split()) > 1200:
+                return JsonResponse({"error": "Ingevoerde tekst is te lang"}, status=400)
 
             # Define number of exercises based on difficulty
             nr_of_identify = 0

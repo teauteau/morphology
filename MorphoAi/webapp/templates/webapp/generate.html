@@ -293,7 +293,7 @@ generateBtn.addEventListener("click", async (event) => {
             window.location.href = data.result_url; // Redirect to results page
         } else {
             console.error("Fout:", data.error);
-            showError("Er is iets misgegaan bij het genereren. Probeer het opnieuw.");
+            showError("Er is iets misgegaan bij het genereren. Foutmelding: " + data.error);
         }
     } catch (error) {
         console.error("Error:", error);
