@@ -97,7 +97,17 @@
 
   </div>
     <!-- <br> -->
-    <button id="generate-btn" class="btn btn-dark btn-lg mt-4" disabled>Genereer</button>
+    <!-- Replace the button section with this -->
+<div class="text-center mt-4">
+  <button id="generate-btn" class="btn btn-dark btn-lg" disabled>Genereer</button>
+  
+  <!-- Loading Spinner -->
+  <div id="loading-spinner" class="d-none mt-3">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Laden...</span>
+    </div>
+    <p class="mt-2">Even geduld, de oefeningen worden gegenereerd...</p>
+  </div>
 </div>
 
 <style>
@@ -173,6 +183,16 @@
         color: white;
         transform: scale(1.02);
     }
+    
+    /* Loading spinner styles */
+    #loading-spinner {
+        margin: 20px auto;
+    }
+    
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
 </style>
 
 <script>
@@ -201,6 +221,7 @@ const textInput = document.getElementById("text-input");
 const generateBtn = document.getElementById("generate-btn");
 const difficultyButtons = document.querySelectorAll(".difficulty-btn");
 const difficultyToggle = document.getElementById("easyToggle");
+const loadingSpinner = document.getElementById("loading-spinner");
 let selectedDifficulties = new Set();
 
 // Event listener for text input to enable the generate button
@@ -272,11 +293,11 @@ generateBtn.addEventListener("click", async (event) => {
     const text = textInput.value.trim();
     if (!text) return;
 
-    generateBtn.innerText = "Even geduld...";
+    // Disable button and show loading spinner
     generateBtn.disabled = true;
+    loadingSpinner.classList.remove("d-none");
 
     try {
-
         const levels = Array.from(selectedDifficulties); // Convert Set to Array
         console.log(levels)
         const response = await fetch("{% url 'generate' %}", {
@@ -290,20 +311,32 @@ generateBtn.addEventListener("click", async (event) => {
 
         const data = await response.json();
         if (data.result_url) {
+            // Set a timeout to ensure the spinner is hidden if the redirect doesn't happen
+            setTimeout(() => {
+                loadingSpinner.classList.add("d-none");
+                generateBtn.disabled = false;
+            }, 5000); // 5 second timeout as a fallback
+            
             window.location.href = data.result_url; // Redirect to results page
         } else {
             console.error("Fout:", data.error);
+<<<<<<< HEAD
+            showError("Er is iets misgegaan bij het genereren. Probeer het opnieuw.");
+            // Hide spinner and enable button when there's an error
+            loadingSpinner.classList.add("d-none");
+            generateBtn.disabled = false;
+=======
             showError("Er is iets misgegaan bij het genereren. Foutmelding: " + data.error);
+>>>>>>> 225f4f362aeb3f8e5f728d1f7a57b30aa8b8c360
         }
     } catch (error) {
         console.error("Error:", error);
         showError("Er is een fout opgetreden. Controleer je verbinding of probeer het later opnieuw.");
+        // Hide spinner and enable button when there's an error
+        loadingSpinner.classList.add("d-none");
+        generateBtn.disabled = false;
     }
-
-    generateBtn.innerText = "Genereer";
-    generateBtn.disabled = false;
 });
-
 
     function getCookie(name) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
