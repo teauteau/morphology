@@ -13,6 +13,8 @@ from django.views.decorators.csrf import csrf_exempt #REMOVE FOR PRODUCTION
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
+from google import genai
+
 
 exercise_types = {"identify": "Identificeer morfemen", #hard
                    "fill_in_the_blank": "Invullen", #medium
@@ -589,3 +591,17 @@ def update_title(request):
         return JsonResponse({'status': 'ok'})
         
     return JsonResponse({'error': 'Invalid request'}, status=405)
+
+from django.shortcuts import render, redirect
+
+def store_api_key(request):
+
+    if request.method == 'POST':
+        api_key = request.POST.get('api_key')
+        restore = request.POST.get('restore_key')
+        if restore:
+            request.session['user_api_key'] = ""
+        else:
+            if api_key:
+                request.session['user_api_key'] = api_key
+        return redirect(request.META.get('HTTP_REFERER', '/'))

@@ -13,6 +13,9 @@
 
     <link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}" >
 
+    <!-- Bootstrap JS bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
         .navbar {
             background-color: #f8f9fa;
@@ -48,6 +51,9 @@
             <a href="{% url 'about' %}" class="btn {% if request.resolver_match.url_name == 'about' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">Over</a>
             <a href="{% url 'contact' %}" class="btn {% if request.resolver_match.url_name == 'contact' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">Contact</a>
             <a href="{% url 'help' %}" class="btn {% if request.resolver_match.url_name == 'help' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">Help</a>
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#apiKeyModal">
+                 API KEY <i class="bi bi-key-fill"></i>
+            </button>
         </div>
     </nav>
     
@@ -57,7 +63,45 @@
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> -->
 
+
+
+    <!--  API KEY Modal -->
+    <div class="modal fade" id="apiKeyModal" tabindex="-1" aria-labelledby="apiKeyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" action="{% url 'store_api_key' %}">
+        {% csrf_token %}
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="apiKeyModalLabel">API key invoeren </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <p>Om van de app gebruik te maken, is een Google Gemini API key nodig. Vul deze in het onderstaande tekstveld in. Bij vragen kunt u contact opnemen met de developers.</p>
+            <div class="mb-3">
+                <label for="apiKeyInput" class="form-label">API Key</label>
+                <input type="text" class="form-control" id="apiKeyInput" name="api_key">
+            </div>
+
+            <!-- Restore toggle -->
+            <div class="form-check form-switch mt-3">
+                <input class="form-check-input" type="checkbox" id="restoreSwitch" name="restore_key">
+                <label class="form-check-label" for="restoreSwitch">Originele Key Herstellen</label>
+            </div>
+                <!-- <div class="text-end">
+                    <button type="button" class="btn btn-link btn-sm" id="restoreApiKeyBtn">Originele Key Herstellen</button>
+                </div> -->
+            </div>
+            
+            <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Opslaan</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+            </div>
+        </div>
+        </form>
     
+    </div>
+    </div>
+
 
 </body>
 </html>

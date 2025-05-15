@@ -4,13 +4,29 @@ import json
 import re
 import random
 import spacy
+from .middleware import get_current_request
+
 
 
 client = genai.Client(api_key=gemini_API_key)
 model = "gemini-2.0-flash"
 
+def get_client():
+    request = get_current_request()
+    print(request)
+    if not request:
+        return client
+    else:
+        key = request.session.get('user_api_key')
+    if not key or key == "":
+        return client
+    else:
+        return genai.Client(api_key=key)
+
 def generate_text(prompt):
-    response = client.models.generate_content(
+    
+    client_new = get_client()
+    response = client_new.models.generate_content(
     model=model,
     contents=prompt,
 )

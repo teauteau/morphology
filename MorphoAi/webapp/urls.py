@@ -21,6 +21,8 @@ urlpatterns = [
     path('add_custom_exercise/', views.add_custom_exercise, name='add_custom_exercise'),
     path('generate_exercise_given_word/', views.generate_exercise_given_word, name='generate_exercise_given_word'),
     path('update_title/', views.update_title, name='update_title'),
+    path('store-api-key/', views.store_api_key, name='store_api_key'),
+
 
 
 
