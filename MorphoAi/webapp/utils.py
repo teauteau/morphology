@@ -5,6 +5,21 @@ import re
 import random
 import spacy
 from .middleware import get_current_request
+from pattern.nl import parse
+
+try:
+    import spacy
+    print("Spacy is used")
+    NLP_BACKEND = "spacy"
+except ImportError:
+    try:
+        from pattern.nl import parse
+        print("pattern.nl is used")
+        NLP_BACKEND = "pattern"
+    except ImportError:
+        print("No NLP package is available")
+        NLP_BACKEND = None
+
 
 
 
@@ -347,21 +362,71 @@ def find_specific_POS(pos_tag, dict_words):
     Finds all words with a specific part of speech (POS) tag in the given list of words.
     Uses spaCy for POS tagging.
     """
-    nlp = spacy.load("nl_core_news_sm")
-    list = []
-    singulars = []
-    plurals = []
-    for word in dict_words:
-        doc = nlp(word['word'])
-        for token in doc:
-            number = token.morph.get("Number")[0] if token.morph.get("Number") else "Unknown"
-            if token.pos_ == pos_tag:
-                list.append(word)
-                if number == "Plur":
-                    plurals.append(word)
-                if number == "Sing":
-                    singulars.append(word)
-    return list, singulars, plurals
+    
+    nouns = []
+    singular_nouns = []
+    plural_nouns = []
+    
+    if NLP_BACKEND == "spacy":
+    
+        nlp = spacy.load("nl_core_news_sm")
+        for word in dict_words:
+            doc = nlp(word['word'])
+            for token in doc:
+                number = token.morph.get("Number")[0] if token.morph.get("Number") else "Unknown"
+                if token.pos_ == pos_tag:
+                    nouns.append(word)
+                    if number == "Plur":
+                        plural_nouns.append(word)
+                    if number == "Sing":
+                        singular_nouns.append(word)
+                            
+    elif NLP_BACKEND == "pattern":
+        for item in dict_words:
+            word = item["word"]
+            parsed = parse(word, lemmata=True).split()
+            
+            if not parsed or not parsed[0]:
+                continue  # skip if nothing parsed
+
+            parsed_word = parsed[0][0]  # Only one word
+            word_text, tag, _, _, lemma = parsed_word
+            print(word_text, tag, _, _, lemma)
+            if tag == "NN":
+                singular_nouns.append(item)
+                nouns.append(item)
+            if tag == "NNS":
+                plural_nouns.append(item)
+                nouns.append(item)
+            
+        
+    # all_words = [d['word'] for d in dict_words]
+    
+    # prompt = (
+    #     f"Return all Dutch NOUNS in the following list: '{all_words}'? "
+    #     f"Return the result as a JSON array. If there are no nouns, return an empty array []."
+    # )
+    
+    # output_json = generate_text(prompt)
+    # output = remove_markdown(output_json)
+    # output = json.loads(output)
+    # print('api noun list: ', output)
+    # singulars = []
+    # plurals = []
+    # nouns = []
+
+    # for word in dict_words:
+    #     print(word['word'], output)
+    #     if word['word'] in output:
+    #         nouns.append(word)
+    #         print('True')
+    #         if word['word'].endswith('en') or word['word'].endswith('s'):
+    #             plurals.append(word)
+    #         else:
+    #             singulars.append(word)
+
+
+    return nouns, singular_nouns, plural_nouns
 
 def easy_extra_exercises(nr_of_exercises):
     q1 = "Geef drie voorbeelden van een gebonden morfeem"

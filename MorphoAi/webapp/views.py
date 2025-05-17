@@ -206,11 +206,11 @@ def generate(request):
                 nr_of_alternative += 0
                 nr_of_wrong_words += 0
                 nr_of_affix += 0
-                nr_of_plural_form += 0
-                nr_of_singular_form += 0
-                nr_find_compounds += 1
-                nr_find_plurals += 1
-                nr_find_diminutives += 1
+                nr_of_plural_form += 1
+                nr_of_singular_form += 1
+                nr_find_compounds += 0
+                nr_find_plurals += 0
+                nr_find_diminutives += 0
 
 
             if "medium" in difficulty:
