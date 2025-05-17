@@ -3,9 +3,7 @@ from .keys import gemini_API_key
 import json
 import re
 import random
-import spacy
 from .middleware import get_current_request
-from pattern.nl import parse
 
 try:
     import spacy
