@@ -2,23 +2,53 @@
 {% block title %}Contact - MorKI{% endblock %}
 {% block content %}
 <div class="container mt-5">
-    <h1 class="display-4">Neem contact op</h1>
-    <p class="lead">Heb je vragen? Stuur ons een bericht!</p>
+    <h1 class="display-4 text-center">Neem contact op met ons team</h1>
+    <p class="lead text-center">Heb je vragen over MorKI? Neem gerust contact op met een van onze teamleden.</p>
 
-    <form class="mt-4">
-        <div class="mb-3">
-            <label for="name" class="form-label">Naam</label>
-            <input type="text" class="form-control" id="name" placeholder="Uw naam">
+    <div class="row row-cols-1 row-cols-md-2 g-4 mt-4">
+        <!-- Member 1 -->
+        <div class="col">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Uros Mihailovic</h5>
+                    <p class="card-text">Front-end & UX Designer</p>
+                    <p class="text-muted mb-1"><i class="bi bi-envelope"></i>uros.mihailovic@ru.nl</p>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="email" class="form-label">E-mail</label>
-            <input type="email" class="form-control" id="email" placeholder="Uw e-mailadres">
+
+        <!-- Member 2 -->
+        <div class="col">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Lohith Ashwa</h5>
+                    <p class="card-text">AI Developer</p>
+                    <p class="text-muted mb-1"><i class="bi bi-envelope"></i>lohith.ashwa@ru.nl</p>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="message" class="form-label">Bericht</label>
-            <textarea class="form-control" id="message" rows="4" placeholder="Uw bericht..."></textarea>
+
+        <!-- Member 3 -->
+        <div class="col">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Eva Grasmeijer</h5>
+                    <p class="card-text">Content & Linguistic Expert</p>
+                    <p class="text-muted mb-1"><i class="bi bi-envelope"></i>eva.grasmeijer@ru.nl</p>
+                </div>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Verstuur</button>
-    </form>
+
+        <!-- Member 4 -->
+        <div class="col">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Thomas Helsen</h5>
+                    <p class="card-text">Back-end Developer</p>
+                    <p class="text-muted mb-1"><i class="bi bi-envelope"></i>thomas.helsen@ru.nl</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
