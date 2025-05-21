@@ -285,6 +285,9 @@ def about(request):
 def summary(request):
     return render(request, 'webapp/summary.html')
 
+def lesson(request):
+    return render(request, 'webapp/lesson.html')
+
 def contact(request):
     team_members = [
         {'name': 'Lid 1', 'role': 'Ontwikkelaar', 'email': 'example1@email.com'},

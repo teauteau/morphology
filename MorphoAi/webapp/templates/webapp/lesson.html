@@ -1,0 +1,38 @@
+{% extends 'webapp/base.html' %}
+{% block title %}Lesvoorbereiding - MorKI{% endblock %}
+{% block content %}
+{% load static %}
+
+
+<div class="container mt-5">
+    <h1 class="display-4 text-center mb-4">Lesvoorbereiding</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <p class="lead text-center">
+        	    Met deze op maat gemaakte lesvoorbereiding kunt u direct beginnen met het onderwijzen van morfologie.
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-3">        
+        <div class="card download-card shadow-sm" style="width: 18rem; cursor: pointer;" onclick="window.location.href='{% static 'lesvoorbereiding.pdf' %}'">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#0d6efd" class="bi bi-file-earmark-pdf" viewBox="0 0 16 16">
+                    <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                </svg>
+                </div>
+                <h5 class="card-title">Lesvoorbereiding.pdf</h5>
+                <!-- <p class="card-text text-muted">Klik om te downloaden</p> -->
+                <div class="d-grid mt-4">
+                <a href="{% static '/lesvoorbereiding.pdf' %}" class="btn btn-primary" download>
+                    <i class="bi bi-download me-2"></i>Downloaden
+                </a>
+            </div>
+        </div>
+    </div>
+
+    </div>
+</div>
+{% endblock %}
