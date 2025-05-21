@@ -68,16 +68,16 @@ def group_exercises(exercises):
     }
     # exercise difficulty
     exercise_difficulty = {
-        "identify": "easy",
+        "identify": "hard",
         "fill_in_the_blank":"medium" ,
-        "alternative_form": "medium",
-        "error_correction": "hard",
+        "alternative_form": "hard",
+        "error_correction": "medium",
         "find_compound":"easy" ,
         "find_plural": "easy",
         "find_diminutive": "easy",
         "plural_form":"medium" ,
         "singular_form": "medium",
-        "affix_matching": "hard" ,
+        "affix_matching": "medium" ,
         "easy_extra": "easy_extra" ,
 
     }
@@ -217,7 +217,7 @@ def generate(request):
                 nr_of_identify += 0
                 nr_of_fill_in_blanks += 3
                 nr_of_alternative += 0
-                nr_of_wrong_words += 3
+                nr_of_wrong_words += 1
                 nr_of_affix += 1
                 nr_find_compounds += 0
                 nr_of_plural_form += 3
