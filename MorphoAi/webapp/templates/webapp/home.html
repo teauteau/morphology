@@ -10,9 +10,21 @@
         Een interactieve tool voor leerkrachten om hen te helpen bij het maken van opgaven 
         op het gebied van morfologie aan de hand van een geïmporteerde tekst.
     </p>
-    <a href="{% url 'generate' %}">
-        <button class="btn btn-info btn-lg text-white start-btn">Start</button>
-    </a>
+    <div class="d-flex align-items-center">
+        <a href="{% url 'generate' %}">
+            <button class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm me-3">
+                <i class="bi bi-play-fill me-2"></i> Start
+            </button>
+        </a>
+
+        <a href="/about">
+            <button class="btn btn-outline-secondary btn-lg rounded-pill px-4 shadow-sm">
+                <i class="bi bi-info-circle me-2"></i> Info
+            </button>
+        </a>
+    </div>
+
+
 </div>
 
 <style>
