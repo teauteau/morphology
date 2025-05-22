@@ -129,7 +129,7 @@ def exercise_fill_in_the_blank(dict_word):
     
     # prompt = f"First get the root form or infinitive of the Dutch word '{word}'. Then, change the word to plural/singular or change the tense. Generate a Dutch sentence that contains that changed word that is grammatically correct. The sentence should be a complete sentence and not just a fragment. The word SHOULD NOT be in the exact same form as the root from. Return your answer formatted as JSON with three keys: sentence (containing the full sentence including the word), root (containing the root or infinitive of the original word) and changed_word (containing the changed version of the word). Do not include any markdown formatting like triple backticks in your answer. " 
     
-    prompt = f"You have two tasks. Task 1: find the infiniive or root form of the Dutch word {word}, from now referred to as 'root'. Task 2: change the tense of the root word OR make it plural OR . Then generate a full Dutch sentence with the new word. It should be DIFFERENT than the root from. Return your answer formatted as JSON with three keys: root (containing the root),  sentence (containing the full sentence including the word), and changed_word (containing the changed version of the word like in the sentence). Do not include any markdown formatting like triple backticks in your answer. " 
+    prompt = f"You have two tasks. Task 1: find the infinitive or root form of the Dutch word {word}, from now referred to as 'root'. Task 2: change the tense of the root word OR make it plural OR . Then generate a full Dutch sentence with the new word. It should be DIFFERENT than the root from. Return your answer formatted as JSON with three keys: root (containing the root),  sentence (containing the full sentence including the word), and changed_word (containing the changed version of the word like in the sentence). Do not include any markdown formatting like triple backticks in your answer. " 
     output_json = generate_text(prompt)
     output = remove_markdown(output_json)
     output = json.loads(output)
@@ -445,7 +445,77 @@ def easy_extra_exercises(nr_of_exercises):
     chosen_exercises = random.sample(exercises, min(nr_of_exercises, len(exercises)))
     return chosen_exercises
 
-def generate_exercises(text, easy_extra, nr_of_identify, nr_of_fill_in_blanks, nr_of_alternative_forms, nr_wrong, nr_affix, nr_find_compounds, nr_find_plural, nr_find_diminutive, nr_of_plural=0, nr_of_singular=0):
+def exercise_find_single(word_type, text):
+    if word_type == "prefix":
+        q = "Kijk of je een woord met een prefix kunt vinden in de tekst en schrijf dit op. Als je er geen kunt vinden, schrijf dan een kruisje op. "
+        prompt = f"Find some Dutch words containg a {word_type} in the following Dutch text. If there are none, return 'None'. Otherwise ONLY return the words. The text: {text}"	
+        output_json = generate_text(prompt)
+        output = remove_markdown(output_json)
+        if 'None' in output:
+            a = "Wij hebben geen woorden kunnen vinden in deze tekst"
+        a = f"Voorbeelden zijn: {output}"
+        return ("find_single", q, a)
+    
+    if word_type == "suffix":
+        q = "Kijk of je een woord met een suffix kunt vinden in de tekst en schrijf dit op. Als je er geen kunt vinden, schrijf dan een kruisje op. "
+        prompt = f"Find some Dutch words containg a {word_type} in the following Dutch text. If there are none, return 'None'. Otherwise ONLY return the words. The text: {text}"	
+        output_json = generate_text(prompt)
+        output = remove_markdown(output_json)
+        if 'None' in output:
+            a = "Wij hebben geen woorden kunnen vinden in deze tekst"
+        a = f"Voorbeelden zijn: {output}"
+        return ("find_single", q, a)
+    
+    if word_type == "prefix_suffix":
+        q = "Kijk of je een woord met zowel een prefix als een suffix kunt vinden in de tekst en schrijf dit op. Als je er geen kunt vinden, schrijf dan een kruisje op.  "
+        prompt = f"Find some Dutch words containg BOTH a prefix and suffix in the following Dutch text. If there are none, return 'None'. Otherwise ONLY return the words. The text: {text}"	
+        output_json = generate_text(prompt)
+        output = remove_markdown(output_json)
+        if 'None' in output:
+            a = "Wij hebben geen woorden kunnen vinden in deze tekst"
+        a = f"Voorbeelden zijn: {output}"
+        return ("find_single", q, a)
+    
+    if word_type == "comparison":
+        q = "Kijk of er een bijvoegelijk naamwoord in de tekst te vinden is. Schrijf dit woord op en maak er een vergelijking mee. Als je er geen kunt vinden, schrijf dan een kruisje op."
+        prompt = f"Find a Dutch adjective in the following Dutch text. If there are none, return 'None'. Otherwise return the adjective and a comparison (comparitive/superlative) from that adjective. Example: 'groot' -> 'groter'. The text: {text}"	
+        output_json = generate_text(prompt)
+        output = remove_markdown(output_json)
+        if 'None' in output:
+            a = "Wij hebben geen woorden kunnen vinden in deze tekst"
+        a = f"Voorbeelden zijn: {output}"
+        return ("find_single", q, a)
+    
+    if word_type == "buiging_e":
+        q = "Kijk of je een woord met een buiging -e kunt vinden in de tekst en schrijf dit op. Als je er geen kunt vinden, schrijf dan een kruisje op. "
+        prompt = f"Find some Dutch words in the following Dutch text that contain a 'buiging -e'. If there are none, return 'None'. Return ONLY the words that contain a 'buiging -e'. Example: 'grote'. The text: {text}"	
+        output_json = generate_text(prompt)
+        output = remove_markdown(output_json)
+        if 'None' in output:
+            a = "Wij hebben geen woorden kunnen vinden in deze tekst"
+        a = f"Voorbeelden zijn: {output}"
+        return ("find_single", q, a)
+    
+def generate_exercises(text, 
+                easy_extra,
+                nr_of_identify, 
+                nr_of_fill_in_blanks, 
+                nr_of_alternative_forms, 
+                nr_wrong, 
+                nr_affix, 
+                nr_find_compounds,
+                nr_find_plural,
+                nr_find_diminutive,
+                nr_of_find_single_prefix,
+                nr_of_find_single_suffix,
+                nr_of_plural,
+                nr_of_singular,
+                nr_of_find_single_prefix_suffix,
+                nr_of_find_single_comparison,
+                nr_of_find_single_buiging_e
+                ):
+    
+    
     """
     Generates exercises for the given text 
     returns in format exercises = [(exercise_type, exercise_text, answer_text), ...]
@@ -466,6 +536,32 @@ def generate_exercises(text, easy_extra, nr_of_identify, nr_of_fill_in_blanks, n
     if easy_extra:
         easy_exercises = easy_extra_exercises(5)
         exercises.extend(easy_exercises)
+        
+    # add find_prefixes exercises
+    for i in range(nr_of_find_single_prefix):
+        exercise = exercise_find_single('prefix', text)
+        exercises.append(exercise)
+    
+    # add find_suffixes exercises
+    for i in range(nr_of_find_single_prefix_suffix):
+        exercise = exercise_find_single('suffix', text)
+        exercises.append(exercise)
+        
+    # add find prefix suffix exercises
+    for i in range(nr_of_find_single_prefix_suffix):
+        exercise = exercise_find_single('prefix_suffix', text)
+        exercises.append(exercise)
+        
+    # add find comparison exercises
+    for i in range(nr_of_find_single_comparison):
+        exercise = exercise_find_single('comparison', text)
+        exercises.append(exercise)
+        
+    # add find buiging -e exercises
+    for i in range(nr_of_find_single_buiging_e):
+        exercise = exercise_find_single('buiging_e', text)
+        exercises.append(exercise)
+
 
     # Add identify exercises
     for i in range(nr_of_identify):
@@ -564,14 +660,50 @@ def add_exercises(type, nr_of_exercises, morphemes, text, index=0):
     """
     index = int(index) + 1
     exercises = []
-    nouns, singulars, plurals = find_specific_POS("NOUN", morphemes)  # find all nouns
+    if (type == "plural_form" and nr_of_exercises > 0) or (type == "singular_form" and nr_of_exercises > 0):
+        nouns, singulars, plurals = find_specific_POS("NOUN", morphemes)  # find all nouns
 
     # Safety check - if no morphemes are available, return empty list
     if not morphemes or len(morphemes) == 0:
         print(f"Warning: No morphemes available for exercise type: {type}")
         return exercises
     
-    if type == "identify":
+    # if no exercises are requested, return empty list
+    if nr_of_exercises <=0:
+        return exercises
+    
+    
+    if type == "find_single_prefix" :
+        # Add find_prefixes exercises
+        for i in range(nr_of_exercises):
+            exercise = exercise_find_single('prefix', text)
+            exercises.append(exercise)
+            
+    elif type == "find_single_suffix":
+        # Add find_prefixes exercises
+        for i in range(nr_of_exercises):
+            exercise = exercise_find_single('suffix', text)
+            exercises.append(exercise)  
+            
+    elif type == "find_single_prefix_suffix":
+        # Add find_prefixes exercises
+        for i in range(nr_of_exercises):
+            exercise = exercise_find_single('prefix_suffix', text)
+            exercises.append(exercise)
+    
+    elif type == "find_single_comparison":
+        # Add find_prefixes exercises
+        for i in range(nr_of_exercises):
+            exercise = exercise_find_single('comparison', text)
+            exercises.append(exercise)
+    elif type == "find_single_buiging_e":
+        # Add find_prefixes exercises
+        for i in range(nr_of_exercises):
+            exercise = exercise_find_single('buiging_e', text)
+            exercises.append(exercise) 
+
+    
+    elif type == "identify":
         # Add identify exercises
         for i in range(nr_of_exercises):
             # Use modulo to wrap around when index exceeds available words

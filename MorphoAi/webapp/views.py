@@ -25,11 +25,17 @@ exercise_types = {"identify": "Identificeer morfemen", #hard
                    "find_plurals": "Vind alle meervoudsvormen", #easy
                    "find_diminutives": "Vind alle verkleinwoorden", #easy
                    "plural_form": "Meervoudsvorm", # medium
-                   "singular_form": "Enkelvoudsvorm" # medium
+                   "singular_form": "Enkelvoudsvorm", # medium
+                   "find_single_prefix": "Vind een prefix", # medium
+                   "find_single_suffix": "Vind een suffix", # medium
+                   "find_single_prefix_suffix": "Vind een woord met prefix en suffix", # medium
+                   "find_single_comparison": "Vind een vergelijking", # medium
+                   "find_single_buiging_e": "Vind een buiging -e" # medium
+                   
                    } 
 
 # these exercise types are not used in the dropdown menu (use this for exercises that do not depend on a single word)
-exercise_types_ignore = ["affix_matching", "find_compounds", "find_plurals", "find_diminutives"]
+exercise_types_ignore = ["affix_matching", "find_compounds", "find_plurals", "find_diminutives", "find_single_prefix", "find_single_suffix"]
 
 # example for each exercise type
 exercise_examples = {"identify" : "Identificeer de morfemen in het woord 'onvergetelijk'.",
@@ -41,7 +47,12 @@ exercise_examples = {"identify" : "Identificeer de morfemen in het woord 'onverg
                       "find_plurals" : "Vind alle meervoudsvormen in de tekst.",
                       "find_diminutives" : "Vind alle verkleinwoorden in de tekst.",
                       "plural_form" : "Wat is de meervoudsvorm van 'boek'?",
-                      "singular_form" : "Wat is de enkelvoudsvorm van 'boeken'?"}
+                      "singular_form" : "Wat is de enkelvoudsvorm van 'boeken'?",
+                      "find_single_prefix" : "Vind een woord met een prefix in de tekst.",
+                      "find_single_suffix" : "Vind een woord met een suffix in de tekst. ",
+                      "find_single_prefix_suffix" : "Vind een woord met een prefix en suffix in de tekst. ",
+                      "find_single_comparison" : "Vind een woord met een vergelijking in de tekst. ",
+                      "find_single_buiging_e" : "Vind een woord met een buiging -e in de tekst. "}
 
 
 def home(request):
@@ -63,6 +74,7 @@ def group_exercises(exercises):
         "plural_form": "Geef de meervoudsvorm van de volgende woorden:",
         "singular_form": "Geef de enkelvoudsvorm van de volgende woorden:",
         "affix_matching": "Match de voorvoegsels en achtervoegsels met de juiste woorden:",
+        "find_single": "Beantwoord de volgende vragen:",
         "easy_extra": "Beantwoord de volgende vragen:",
 
     }
@@ -78,6 +90,7 @@ def group_exercises(exercises):
         "plural_form":"medium" ,
         "singular_form": "medium",
         "affix_matching": "medium" ,
+        "find_single": "medium",
         "easy_extra": "easy_extra" ,
 
     }
@@ -195,6 +208,11 @@ def generate(request):
             nr_find_diminutives = 0
             nr_of_plural_form = 0  
             nr_of_singular_form = 0 
+            nr_of_find_single_prefix = 0
+            nr_of_find_single_suffix = 0
+            nr_of_find_single_prefix_suffix = 0
+            nr_of_find_single_comparison = 0
+            nr_of_find_single_buiging_e = 0
             easy_extra = False
             
             if "easy_extra" in difficulty:
@@ -208,9 +226,14 @@ def generate(request):
                 nr_of_affix += 0
                 nr_of_plural_form += 0
                 nr_of_singular_form += 0
-                nr_find_compounds += 1
-                nr_find_plurals += 1
-                nr_find_diminutives += 1
+                nr_find_compounds += 0 #1
+                nr_find_plurals += 0 #1
+                nr_find_diminutives += 0 #1
+                nr_of_find_single_prefix += 1
+                nr_of_find_single_suffix += 1
+                nr_of_find_single_prefix_suffix += 1
+                nr_of_find_single_comparison += 1
+                nr_of_find_single_buiging_e += 1
 
 
             if "medium" in difficulty:
@@ -253,8 +276,13 @@ def generate(request):
                 nr_find_compounds,
                 nr_find_plurals,
                 nr_find_diminutives,
+                nr_of_find_single_prefix,
+                nr_of_find_single_suffix,
                 nr_of_plural_form,  
-                nr_of_singular_form  
+                nr_of_singular_form,
+                nr_of_find_single_prefix_suffix,
+                nr_of_find_single_comparison,
+                nr_of_find_single_buiging_e
 
             )      
             
@@ -410,6 +438,7 @@ def add_exercises(request):
             for i, exercise in enumerate(exercises_types):
                 exercise_count = int(exercise.get('count', 0)) if exercise.get('count', '').strip() else 0
                 exercise_type = exercise.get('type', 'identify')
+                print('exercise_type: ', exercise_type)
                 index = len(old_exercises) / len(exercise_types)
                 generated_exercises = utils_add_exercises(exercise_type, exercise_count, request.session.get("morphemes", [{'word': 'foutje', 'free': ['fout'], 'bound': {'prefixes': [], 'suffixes': ['je'], 'other': []}}]), text=text, index=index)
                 new_exercises.extend(generated_exercises)

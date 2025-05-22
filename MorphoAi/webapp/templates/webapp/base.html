@@ -51,7 +51,7 @@
             <a href="{% url 'lesson' %}" class="btn {% if request.resolver_match.url_name == 'lesson' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">Lesvoorbereiding</a>
             <a href="{% url 'about' %}" class="btn {% if request.resolver_match.url_name == 'about' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">Over</a>
             <a href="{% url 'contact' %}" class="btn {% if request.resolver_match.url_name == 'contact' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">Contact</a>
-            <a href="{% url 'FAQs' %}" class="btn {% if request.resolver_match.url_name == 'FAQs' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">FAQs</a>
+            <a href="{% url 'FAQ' %}" class="btn {% if request.resolver_match.url_name == 'FAQ' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">FAQ</a>
             <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#apiKeyModal">
                  API KEY <i class="bi bi-key-fill"></i>
             </button>
