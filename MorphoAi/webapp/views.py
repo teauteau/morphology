@@ -226,9 +226,9 @@ def generate(request):
                 nr_of_affix += 0
                 nr_of_plural_form += 0
                 nr_of_singular_form += 0
-                nr_find_compounds += 0 #1
-                nr_find_plurals += 0 #1
-                nr_find_diminutives += 0 #1
+                nr_find_compounds += 1 
+                nr_find_plurals += 1 
+                nr_find_diminutives += 1 
                 nr_of_find_single_prefix += 1
                 nr_of_find_single_suffix += 1
                 nr_of_find_single_prefix_suffix += 1

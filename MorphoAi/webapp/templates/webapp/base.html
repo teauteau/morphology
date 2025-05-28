@@ -53,7 +53,7 @@
             <a href="{% url 'contact' %}" class="btn {% if request.resolver_match.url_name == 'contact' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">Contact</a>
             <a href="{% url 'FAQ' %}" class="btn {% if request.resolver_match.url_name == 'FAQ' %}btn-primary{% else %}btn-outline-dark{% endif %} mx-1">FAQ</a>
             <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#apiKeyModal">
-                 API KEY <i class="bi bi-key-fill"></i>
+                <i class="bi bi-key-fill"></i>
             </button>
         </div>
     </nav>
@@ -73,11 +73,12 @@
         {% csrf_token %}
         <div class="modal-content">
             <div class="modal-header">
-            <h5 class="modal-title" id="apiKeyModalLabel">API key invoeren </h5>
+            <h5 class="modal-title" id="apiKeyModalLabel">Eigen API Key gebruiken </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-            <p>Om van de app gebruik te maken, is een Google Gemini API key nodig. Vul deze in het onderstaande tekstveld in. Bij vragen kunt u contact opnemen met de developers.</p>
+            <p>Deze app maakt gebruik van de Google Gemini API. Het kan voorkomen dat bij het gebruik van de app de limiet van API aanroepingen wordt overschreden voor onze API key. Het is daarom mogelijk om, als u dat wenst, uw eigen API key te gebruiken. Deze kunt u aanvragen op <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">deze website</a>. De key kan hieronder worden ingevoerd. Wij slaan deze code niet op, hij wordt alleen in deze sessie gebruikt. Bij vragen kunt u <a href="/contact" target="_blank" rel="noopener">contact</a> opnemen met de ontwikkelaars. </p>
+
             <div class="mb-3">
                 <label for="apiKeyInput" class="form-label">API Key</label>
                 <input type="text" class="form-control" id="apiKeyInput" name="api_key">
