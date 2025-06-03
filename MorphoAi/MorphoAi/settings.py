@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-aop$vt@ddrhq0-zrb5j5v_83h=%29o#xy1ax(6nj4t&!-w&x-s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['morkiapp.eu.pythonanywhere.com', '127.0.0.1']
 
