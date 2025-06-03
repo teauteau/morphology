@@ -153,7 +153,7 @@ def exercise_alternative_form(dict_word):
     free_morphemes = dict_word['free']
     
     if not free_morphemes:
-        print("no free morphelemes found")
+        print("no free morphemes found")
         return None  # Skip if no free morphemes found
 
     selected_morpheme = free_morphemes[0]
@@ -319,7 +319,7 @@ def exercise_plural_form(dict_word):
     
     # try:
     plural_form = generate_text(prompt).strip()
-    print(f"singular: {word}, plural form: {plural_form}")
+    # print(f"singular: {word}, plural form: {plural_form}")
     if plural_form == "PLURAL":
         return None, None
             
@@ -343,7 +343,7 @@ def exercise_singular_form(dict_word):
     
     
     singular_form = generate_text(prompt).strip()
-    print("word: ", word, "singular: ", singular_form)
+    # print("word: ", word, "singular: ", singular_form)
     # Basic validation - make sure we got something different than the input
     if  "SINGULAR" in singular_form:
         plural = singular_form.split(" ")[1]
@@ -389,7 +389,7 @@ def find_specific_POS(pos_tag, dict_words):
 
             parsed_word = parsed[0][0]  # Only one word
             word_text, tag, _, _, lemma = parsed_word
-            print(word_text, tag, _, _, lemma)
+            # print(word_text, tag, _, _, lemma)
             if tag == "NN":
                 singular_nouns.append(item)
                 nouns.append(item)

@@ -295,7 +295,7 @@ def generate(request):
             request.session["important_words"] = important_words
             request.session['title'] = "Opdrachten over Morfologie" # init title
 
-            print(f"exercise_types: {exercise_types}")
+            print(text)
 
             return JsonResponse({"result_url": reverse('results')})
 
